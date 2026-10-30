@@ -1,0 +1,1 @@
+# gomingan.github.io
