@@ -64,12 +64,21 @@ button{border:0;border-radius:9px;background:#413a59;color:#fff;padding:8px 13px
 
 
 
-html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}img{-webkit-user-drag:none}</style></head>
+html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}img{-webkit-user-drag:none}
+.aimCancel{position:absolute;right:4%;top:4%;width:44px;height:44px;border-radius:50%;background:#000000bb;font-size:18px;z-index:9;align-items:center;justify-content:center;padding:0}
+.homeScene.aiming{touch-action:none}
+.viewfinder.locked{border-color:#ffd45c;box-shadow:0 0 0 2000px #00000055,0 0 20px #ffd45c}
+.homeScene.shot{animation:shotFlash .26s ease-out}
+@keyframes shotFlash{0%{filter:brightness(2.4)}100%{filter:none}}
+/* 모바일 점검: 터치 영역 최소 44px, 주소창이 변하는 브라우저에서 화면 높이 보정 */
+button{min-height:44px;min-width:44px}
+body{min-height:100vh;min-height:100dvh}
+</style></head>
 <body><div id=a>
-<div class=top id=topbar><b>🐾 PAWLIGHT</b><span id=wallet>⭐ 0</span><span id=moonWallet>🌙 0</span><span><button id=shopBtn>🛍️ 상점</button><button id=dbgBtn>⚙</button></span></div>
+<div class=top id=topbar><b>🐾 PAWLIGHT</b><span id=wallet>⭐ 0</span><span id=moonWallet>🌙 0</span><span><button id=shopBtn>🛍️ 상점</button><button id=dbgBtn style="display:none">⚙</button></span></div>
 
 <div id=homeScreen class="screen active">
-  <div class=homeScene><img class=bg id=homeBg src=""><img class=cat id=homeCat src="" style="left:37%;bottom:13%;height:20%;width:auto"><div id=decorSlot></div><div class=viewfinder id=viewfinder></div><button class=cameraBtn id=cameraBtn onclick="enterAimMode()">📷</button></div>
+  <div class=homeScene><img class=bg id=homeBg src=""><img class=cat id=homeCat src="" style="left:37%;bottom:13%;height:20%;width:auto"><div id=decorSlot></div><div class=viewfinder id=viewfinder></div><button class=cameraBtn id=cameraBtn onclick="enterAimMode()">📷</button><button class=aimCancel id=aimCancel onclick="cancelAim()" style="display:none">✕</button></div>
   <div class=photoToast id=photoToast></div>
   <p class=tagline>작은 별빛이, 더 따뜻한 하루를 만들어줘.</p>
   <div class=dailyCard id=dailyCard></div>
@@ -92,7 +101,7 @@ html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webk
     <img class=cat id=cat src="" style="left:30%;bottom:6%;height:17%;width:auto">
     <div class=paw id=paw>🐾</div>
     <div class=legendCard>🔒 고정<br>⭐ 별<br>😴 졸림<br>☁️ 구름<br>✨ 반짝이</div>
-    <button class=testBtn onclick="instantClear()">🧪 바로 클리어</button>
+    <button class=testBtn onclick="instantClear()" style="display:none">🧪 바로 클리어</button>
   </div>
   <div class=msg id=msg></div><div class=bar><span id=diff></span><span id=streak class=streak></span></div>
   <div class=stat id=stat></div>
@@ -237,52 +246,78 @@ function takePhoto(){
   setTimeout(()=>{photoToast.textContent=''},1800);
 }
 
-// ===== 카메라 조준 모드: 손가락/커서를 따라 뷰파인더가 움직이고, 탭하면 그 위치에서 촬영 =====
-let aiming=false, aimX=.5, aimY=.5, homeStageEl=null;
+// ===== 카메라 조준 모드: 동그라미를 끌어서 움직이고, 고양이 위에서 손을 떼면 촬영 =====
+// 터치/마우스 공통(pointer events). 화면 어디를 눌러도 '상대 이동'으로 끌 수 있어서 손가락이 동그라미를 가리지 않아요.
+let aiming=false, aimX=.5, aimY=.5, homeStageEl=null, aimDrag=null;
+const AIM_HIT_RADIUS=0.17; // 판정 반경(스테이지 너비 대비). 클수록 관대함
+function catAimDistance(){
+  let r=homeStageEl.getBoundingClientRect(), c=homeCat.getBoundingClientRect();
+  let cx=c.left+c.width/2-r.left, cy=c.top+c.height/2-r.top;
+  return Math.hypot(aimX*r.width-cx, aimY*r.height-cy)/r.width;
+}
+function setViewfinder(x,y){
+  viewfinder.style.left=x+'px'; viewfinder.style.top=y+'px';
+  viewfinder.classList.toggle('locked', catAimDistance()<AIM_HIT_RADIUS); // 고양이 위에 있으면 금색
+}
 function enterAimMode(){
   if(aiming) return;
   aiming=true;
   homeStageEl=document.querySelector('#homeScreen .homeScene');
   cameraBtn.style.display='none';
+  aimCancel.style.display='flex';
+  homeStageEl.classList.add('aiming');
   viewfinder.classList.add('active');
-  aimX=.5;aimY=.5;
+  aimX=.5; aimY=.5;
   let r=homeStageEl.getBoundingClientRect();
-  viewfinder.style.left=(r.width*aimX)+'px';
-  viewfinder.style.top=(r.height*aimY)+'px';
-  photoToast.textContent='📸 고양이를 조준하고 화면을 눌러 찍어보세요';
-  setTimeout(()=>{
-    homeStageEl.addEventListener('pointermove', onAimMove);
-    homeStageEl.addEventListener('pointerdown', onAimShoot);
-  },0);
-}
-function onAimMove(e){
-  if(!aiming) return;
-  let r=homeStageEl.getBoundingClientRect();
-  let x=Math.max(0,Math.min(r.width,e.clientX-r.left));
-  let y=Math.max(0,Math.min(r.height,e.clientY-r.top));
-  aimX=x/r.width; aimY=y/r.height;
-  viewfinder.style.left=x+'px';
-  viewfinder.style.top=y+'px';
+  setViewfinder(r.width*aimX, r.height*aimY);
+  photoToast.textContent='📸 동그라미를 끌어서 고양이에게 맞추고, 손을 떼면 찍혀요';
+  homeStageEl.addEventListener('pointerdown', onAimDown);
+  homeStageEl.addEventListener('pointermove', onAimMove);
+  homeStageEl.addEventListener('pointerup', onAimUp);
+  homeStageEl.addEventListener('pointercancel', onAimAbort);
 }
 function exitAimMode(){
-  aiming=false;
-  viewfinder.classList.remove('active');
+  aiming=false; aimDrag=null;
+  viewfinder.classList.remove('active','locked');
+  homeStageEl.classList.remove('aiming');
   cameraBtn.style.display='';
+  aimCancel.style.display='none';
+  homeStageEl.removeEventListener('pointerdown', onAimDown);
   homeStageEl.removeEventListener('pointermove', onAimMove);
-  homeStageEl.removeEventListener('pointerdown', onAimShoot);
+  homeStageEl.removeEventListener('pointerup', onAimUp);
+  homeStageEl.removeEventListener('pointercancel', onAimAbort);
 }
-function onAimShoot(e){
-  if(!aiming) return;
+function cancelAim(){ if(aiming){ exitAimMode(); photoToast.textContent=''; } }
+function onAimDown(e){
+  if(!aiming||aimDrag||e.target.closest('#aimCancel')) return;
   let r=homeStageEl.getBoundingClientRect();
-  let x=e.clientX-r.left, y=e.clientY-r.top;
+  aimDrag={id:e.pointerId, sx:e.clientX, sy:e.clientY, ax:aimX*r.width, ay:aimY*r.height, moved:false};
+  try{homeStageEl.setPointerCapture(e.pointerId)}catch(_){}
+}
+function onAimMove(e){
+  if(!aiming||!aimDrag||e.pointerId!==aimDrag.id) return;
+  let r=homeStageEl.getBoundingClientRect();
+  let dx=e.clientX-aimDrag.sx, dy=e.clientY-aimDrag.sy;
+  if(Math.hypot(dx,dy)>6) aimDrag.moved=true;
+  let x=Math.max(0,Math.min(r.width, aimDrag.ax+dx));
+  let y=Math.max(0,Math.min(r.height,aimDrag.ay+dy));
   aimX=x/r.width; aimY=y/r.height;
-  let catRect=homeCat.getBoundingClientRect();
-  let catCX=(catRect.left+catRect.width/2-r.left)/r.width;
-  let catCY=(catRect.top+catRect.height/2-r.top)/r.height;
-  let dist=Math.hypot(aimX-catCX,aimY-catCY);
-  exitAimMode();
-  if(dist<0.17){ takePhoto(); }
-  else { photoToast.textContent='😿 고양이가 프레임 밖으로 빠졌어요, 다시 찍어보세요'; setTimeout(()=>{photoToast.textContent=''},1800); }
+  setViewfinder(x,y);
+}
+function onAimAbort(e){ if(aimDrag&&e.pointerId===aimDrag.id) aimDrag=null; }
+function onAimUp(e){
+  if(!aiming||!aimDrag||e.pointerId!==aimDrag.id) return;
+  let d=aimDrag; aimDrag=null;
+  if(!d.moved) return;                      // 그냥 톡 건드린 건 무시(실수 촬영 방지)
+  if(catAimDistance()<AIM_HIT_RADIUS){      // 명중: 촬영하고 조준 종료
+    let el=homeStageEl;
+    exitAimMode();
+    el.classList.add('shot'); setTimeout(()=>el.classList.remove('shot'),260);
+    if(navigator.vibrate) navigator.vibrate(15);
+    takePhoto();
+  } else {                                   // 빗나감: 조준 상태 유지, 다시 끌어서 시도
+    photoToast.textContent='😿 빗나갔어요, 고양이 위로 옮겨서 다시 놓아보세요';
+  }
 }
 
 const id=(x,y)=>y*N+x,ok=(x,y)=>x>=0&&y>=0&&x<N&&y<N;
@@ -374,7 +409,7 @@ function buy(k){let data=themeData[k];
  else{if(stars<data.cost){msg.textContent='⭐ 별이 부족해요';renderShop();return}stars-=data.cost;owned.push(k);localStorage.pawOwned=JSON.stringify(owned);localStorage.pawStars=stars;wallet.textContent='⭐ '+stars;curTheme=k;localStorage.pawTheme=k}
  renderShop();draw()}
 shopBtn.onclick=()=>{openShop('theme')};
-dbgBtn.onclick=()=>stat.classList.toggle('show');
+dbgBtn.onclick=()=>stat.classList.toggle('show');if(new URLSearchParams(location.search).get('debug')==='1'){dbgBtn.style.display='';document.querySelector('.testBtn').style.display=''}
 function diffLabel(t){return t>=75?'쉬움 🟢':t>=50?'보통 🟡':t>=32?'어려움 🟠':'고난도 🔴'}
 function actualRate(){let h=hist.slice(-10);return h.length?h.reduce((a,b)=>a+b,0)/h.length:null}
 function saveState(){localStorage.pawHist=JSON.stringify(hist.slice(-10));localStorage.pawStars=stars;localStorage.pawStage=st;localStorage.pawStreak=streak;localStorage.pawBest=bestStreak}
