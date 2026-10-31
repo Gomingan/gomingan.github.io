@@ -73,13 +73,31 @@ html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webk
 /* 모바일 점검: 터치 영역 최소 44px, 주소창이 변하는 브라우저에서 화면 높이 보정 */
 button{min-height:44px;min-width:44px}
 body{min-height:100vh;min-height:100dvh}
+
+/* ===== 퍼즐 화면: 창문 그림을 확대하고 정사각형 퍼즐판이 창문 밖으로 살짝 넘치게 ===== */
+#puzzleScreen .scene img.bg{transform:scale(1.3);transform-origin:49.08% 49.1%}
+#puzzleScreen .winSlot{left:49.08%;top:49.1%;width:60%;height:auto;aspect-ratio:1/1;transform:translate(-50%,-50%);display:block}
+#puzzleScreen .winSlot canvas{width:100%;height:100%;aspect-ratio:1/1;background:#15192dd9;border-radius:12px}
+.cat{pointer-events:none}
+.legendCard{right:auto;left:50%;top:1.6%;transform:translateX(-50%);display:flex;gap:9px;padding:5px 10px;line-height:1.2;white-space:nowrap;font-size:10.5px}
+.top{gap:4px}.topBtns{display:flex;gap:2px}
+/* ===== 설정 / 튜토리얼 ===== */
+.setRow{display:flex;justify-content:space-between;align-items:center;margin:10px 0;font-size:14px;text-align:left}
+.setRow button{min-width:84px}.setRow button.on{background:#6d55d9}
+.setNote{font-size:11px;color:#8b90ad;margin:-4px 0 6px;text-align:left}
+.coachCard{display:none;background:#2b2450;border:1px solid #6d55d9;border-radius:14px;padding:10px 14px;margin:8px 4px 0;font-size:13px;line-height:1.5;color:#f1ecff;text-align:left}
+.handHint{display:none;position:absolute;z-index:7;font-size:34px;pointer-events:none;transform:translate(-25%,-10%);animation:tapBounce 1s ease-in-out infinite;filter:drop-shadow(0 2px 4px #000a)}
+@keyframes tapBounce{0%,100%{margin-top:0}50%{margin-top:-10px}}
+.homeTip{display:none;font-size:12px;color:#ffdda7;background:#1c1f38cc;border-radius:12px;padding:8px 12px;margin:8px 0 0;line-height:1.5}
+.cameraBtn.pulse{animation:camPulse 1.6s infinite}
+@keyframes camPulse{0%{box-shadow:0 0 0 0 #ffd45cbb}70%{box-shadow:0 0 0 14px #ffd45c00}100%{box-shadow:0 0 0 0 #ffd45c00}}
 </style></head>
 <body><div id=a>
-<div class=top id=topbar><b>🐾 PAWLIGHT</b><span id=wallet>⭐ 0</span><span id=moonWallet>🌙 0</span><span><button id=shopBtn>🛍️ 상점</button><button id=dbgBtn style="display:none">⚙</button></span></div>
+<div class=top id=topbar><b>🐾 PAWLIGHT</b><span id=wallet>⭐ 0</span><span id=moonWallet>🌙 0</span><span class=topBtns><button id=shopBtn>🛍️</button><button id=settingsBtn onclick="openSettings()">⚙️</button><button id=dbgBtn style="display:none">🐞</button></span></div>
 
 <div id=homeScreen class="screen active">
   <div class=homeScene><img class=bg id=homeBg src=""><img class=cat id=homeCat src="" style="left:37%;bottom:13%;height:20%;width:auto"><div id=decorSlot></div><div class=viewfinder id=viewfinder></div><button class=cameraBtn id=cameraBtn onclick="enterAimMode()">📷</button><button class=aimCancel id=aimCancel onclick="cancelAim()" style="display:none">✕</button></div>
-  <div class=photoToast id=photoToast></div>
+  <div class=photoToast id=photoToast></div><div class=homeTip id=homeTip>👋 "퍼즐하기"로 별빛 길을 이어주고, 📷으로 고양이의 귀여운 순간을 찍어보세요</div>
   <p class=tagline>작은 별빛이, 더 따뜻한 하루를 만들어줘.</p>
   <div class=dailyCard id=dailyCard></div>
   <button class=bigBtn onclick="goPuzzle()">🌙 &nbsp;퍼즐하기</button>
@@ -98,12 +116,12 @@ body{min-height:100vh;min-height:100dvh}
   <div class=scene id=scene>
     <img class=bg id=sceneImg src="">
     <div class=winSlot><canvas id=c width=420 height=420></canvas></div>
-    <img class=cat id=cat src="" style="left:30%;bottom:6%;height:17%;width:auto">
-    <div class=paw id=paw>🐾</div>
-    <div class=legendCard>🔒 고정<br>⭐ 별<br>😴 졸림<br>☁️ 구름<br>✨ 반짝이</div>
+    <img class=cat id=cat src="" style="left:40%;bottom:1%;height:15%;width:auto">
+    <div class=paw id=paw>🐾</div><div class=handHint id=handHint>👆</div>
+    <div class=legendCard><span>🔒 고정</span><span>⭐ 별</span><span>😴 졸림</span><span>☁️ 구름</span><span>✨ 반짝이</span></div>
     <button class=testBtn onclick="instantClear()" style="display:none">🧪 바로 클리어</button>
   </div>
-  <div class=msg id=msg></div><div class=bar><span id=diff></span><span id=streak class=streak></span></div>
+  <div class=coachCard id=coachCard></div><div class=msg id=msg></div><div class=bar><span id=diff></span><span id=streak class=streak></span></div>
   <div class=stat id=stat></div>
   <div class=actionRow>
     <button onclick=hint()>💡<b>힌트 5⭐</b></button>
@@ -122,6 +140,14 @@ body{min-height:100vh;min-height:100dvh}
 
 </div>
 <div class=modal id=modal><div class=card><div style='font-size:52px'>😿</div><h3>앞발을 다 썼어요</h3><p id=fmsg></p><button class=ad onclick=extend()>▶ 광고 보상 +5 🐾</button><br><button onclick=retry()>다시 도전</button></div></div>
+<div class=modal id=settingsModal><div class=card><h3>⚙️ 설정</h3>
+<div class=setRow><span>🔊 효과음</span><button id=setSfx onclick="toggleSetting('sfx')"></button></div>
+<div class=setRow><span>🎵 배경음</span><button id=setBgm onclick="toggleSetting('bgm')"></button></div>
+<div class=setRow><span>📳 진동</span><button id=setHaptic onclick="toggleSetting('haptic')"></button></div>
+<div class=setNote id=hapticNote style="display:none">※ iPhone의 웹앱은 진동을 지원하지 않아요 (앱스토어 버전에서 지원 예정)</div>
+<div class=setRow><span>📖 튜토리얼</span><button onclick="resetTutorial()">다시 보기</button></div>
+<div class=setRow><span>🗑️ 데이터</span><button id=resetBtn onclick="resetData()">초기화</button></div>
+<button onclick="settingsModal.classList.remove('on')">닫기</button></div></div>
 <div class=modal id=shopModal><div class=card><h3>🛍️ 냥이 상점</h3><div class=tabRow><button class=tabBtn id=tabTheme onclick="switchShopTab('theme')">🎨 테마</button><button class=tabBtn id=tabDecor onclick="switchShopTab('decor')">🧶 소품</button></div><div id=shopList></div><button onclick="shopModal.classList.remove('on')">닫기</button></div></div>
 <div class=modal id=memoryModal><div class=card><h3>📖 작은 추억</h3><p id=memoryBody style="color:#cdd1ea;line-height:1.7"></p><button onclick="memoryModal.classList.remove('on')">닫기</button></div></div>
 <script>
@@ -313,7 +339,7 @@ function onAimUp(e){
     let el=homeStageEl;
     exitAimMode();
     el.classList.add('shot'); setTimeout(()=>el.classList.remove('shot'),260);
-    if(navigator.vibrate) navigator.vibrate(15);
+    haptic(15);
     takePhoto();
   } else {                                   // 빗나감: 조준 상태 유지, 다시 끌어서 시도
     photoToast.textContent='😿 빗나갔어요, 고양이 위로 옮겨서 다시 놓아보세요';
@@ -431,4 +457,168 @@ function hint(){if(stars<5){msg.textContent='⭐ 힌트는 5개 필요해요';re
 C.onpointerdown=e=>{if(lock)return;let r=C.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/r.width*N),y=Math.floor((e.clientY-r.top)/r.height*N),i=id(x,y);if(!ok(x,y)||cells[i].locked||moves>=limit)return;if(cells[i].type==='sleepy'&&cells[i].sleep){cells[i].sleep=false;cells[i].revealed=true;msg.textContent='😺 졸린 타일을 깨웠어';draw();return;}if(cells[i].type==='star'){cells[i].revealed=true;draw();}if(cells[i].type==='cloud'){cells[i].revealed=true;draw();}let cb=C.getBoundingClientRect(),sb=scene.getBoundingClientRect();paw.style.left=(cb.left-sb.left+(x+.5)/N*cb.width)+'px';paw.style.top=(cb.top-sb.top+(y+.5)/N*cb.height)+'px';paw.classList.add('on');setTimeout(()=>paw.classList.remove('on'),120);setTimeout(()=>{cells[i].r=(cells[i].r+1)%4;moves++;power()},65)};
 function instantClear(){if(lock)return;cells.forEach(v=>{if(!v.locked)v.r=0});power()}
 function start(){homeBg.src=ART.stageBg;homeCat.src=IMG.cat_idle.src;sceneImg.src=ART.stageBg;renderDecorSlot();make();switchScreen('home')}
+
+/* ===================== 소리 · 햅틱 · 설정 · 튜토리얼 ===================== */
+var SETTINGS=(function(){try{return Object.assign({sfx:true,bgm:true,haptic:true},JSON.parse(localStorage.pawSettings||'{}'))}catch(e){return{sfx:true,bgm:true,haptic:true}}})();
+function saveSettings(){try{localStorage.pawSettings=JSON.stringify(SETTINGS)}catch(e){}}
+function haptic(ms){
+  if(!SETTINGS.haptic)return;
+  try{
+    var H=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Haptics;
+    if(H){ms>=40?H.impact({style:'MEDIUM'}):H.impact({style:'LIGHT'});return}
+    if(navigator.vibrate)navigator.vibrate(ms);
+  }catch(e){}
+}
+var Snd=(function(){
+  var ctx=null,master=null,sfxBus=null,bgmBus=null,bgmTimer=null,step=0,note=2;
+  var SCALE=[261.63,293.66,329.63,392.00,440.00,523.25,587.33,659.25,783.99]; // C 펜타토닉
+  function init(){
+    if(ctx)return ctx;
+    var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;
+    try{
+      ctx=new AC();master=ctx.createGain();master.gain.value=.9;master.connect(ctx.destination);
+      var dl=ctx.createDelay(1);dl.delayTime.value=.32;var fb=ctx.createGain();fb.gain.value=.38;
+      var wet=ctx.createGain();wet.gain.value=.35;dl.connect(fb);fb.connect(dl);dl.connect(wet);wet.connect(master);
+      sfxBus=ctx.createGain();sfxBus.gain.value=.7;sfxBus.connect(master);sfxBus.connect(dl);
+      bgmBus=ctx.createGain();bgmBus.gain.value=.16;bgmBus.connect(master);bgmBus.connect(dl);
+    }catch(e){ctx=null}
+    return ctx;
+  }
+  function unlock(){var c=init();if(c&&c.state==='suspended')c.resume();applyBgm()}
+  function tone(f,t0,dur,vol,type,bus){
+    var o=ctx.createOscillator(),g=ctx.createGain();o.type=type||'sine';o.frequency.value=f;
+    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(vol,t0+.008);g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+    o.connect(g);g.connect(bus||sfxBus);o.start(t0);o.stop(t0+dur+.05);
+  }
+  function seq(freqs,gap,dur,vol,type){var t=ctx.currentTime+.01;freqs.forEach(function(f,i){tone(f,t+i*gap,dur,vol,type)})}
+  var S={
+    tap:function(){tone(520,ctx.currentTime,.09,.22,'triangle');tone(780,ctx.currentTime+.03,.07,.1,'sine')},
+    star:function(){seq([880,1175,1568],.07,.25,.2,'sine')},
+    clear:function(){seq([523.25,659.25,783.99,1046.5,1318.5],.11,.7,.22,'triangle')},
+    shutter:function(){var t=ctx.currentTime;tone(1800,t,.04,.18,'square');tone(900,t+.05,.07,.14,'square');tone(1320,t+.2,.4,.12,'sine')},
+    lock:function(){tone(988,ctx.currentTime,.12,.16,'sine')},
+    miss:function(){tone(220,ctx.currentTime,.18,.12,'sine')},
+    ui:function(){tone(660,ctx.currentTime,.08,.14,'sine')},
+    buy:function(){seq([659.25,880,1318.5],.08,.3,.18,'triangle')},
+    fail:function(){seq([330,262],.14,.35,.16,'sine')}
+  };
+  function play(n){
+    if(!SETTINGS.sfx)return;var c=init();if(!c||!S[n])return;
+    if(c.state==='suspended')c.resume();
+    try{S[n]()}catch(e){}
+  }
+  function bgmTick(){
+    if(!ctx||ctx.state!=='running'||document.hidden)return;
+    var t=ctx.currentTime+.02;
+    note+=[-2,-1,-1,0,1,1,2][Math.random()*7|0];note=Math.max(0,Math.min(SCALE.length-1,note));
+    if(step%4!==3||Math.random()<.4){tone(SCALE[note],t,1.6,.5,'triangle',bgmBus);tone(SCALE[note]*2,t,.8,.12,'sine',bgmBus)}
+    if(step%8===0)tone(SCALE[0]/2,t,3,.35,'sine',bgmBus);
+    step++;
+  }
+  function applyBgm(){
+    if(bgmTimer){clearInterval(bgmTimer);bgmTimer=null}
+    if(SETTINGS.bgm&&ctx)bgmTimer=setInterval(bgmTick,680);
+  }
+  return {init:init,unlock:unlock,play:play,applyBgm:applyBgm,state:function(){return ctx?ctx.state:'none'}};
+})();
+['pointerdown','touchstart','keydown'].forEach(function(ev){document.addEventListener(ev,function(){Snd.unlock()},{passive:true})});
+document.addEventListener('visibilitychange',function(){if(!document.hidden)Snd.unlock()});
+
+/* 설정 창 */
+function renderSettings(){
+  [['setSfx','sfx'],['setBgm','bgm'],['setHaptic','haptic']].forEach(function(p){
+    var b=document.getElementById(p[0]);b.textContent=SETTINGS[p[1]]?'켜짐':'꺼짐';b.classList.toggle('on',!!SETTINGS[p[1]]);
+  });
+  hapticNote.style.display=(!navigator.vibrate&&!(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Haptics))?'block':'none';
+}
+function openSettings(){renderSettings();settingsModal.classList.add('on');Snd.play('ui')}
+function toggleSetting(k){SETTINGS[k]=!SETTINGS[k];saveSettings();renderSettings();Snd.unlock();if(k==='bgm')Snd.applyBgm();if(k==='haptic')haptic(30);if(k==='sfx')Snd.play('ui')}
+function resetTutorial(){localStorage.removeItem('pawTutDone');localStorage.removeItem('pawTutSeen');localStorage.removeItem('pawHomeTip');settingsModal.classList.remove('on');make();switchScreen('puzzle');tutRefresh()}
+function resetData(){
+  if(!confirm('모든 진행 상황(별, 달빛, 사진, 스테이지)이 지워져요. 정말 초기화할까요?'))return;
+  Object.keys(localStorage).filter(function(k){return k.indexOf('paw')===0}).forEach(function(k){localStorage.removeItem(k)});
+  location.reload();
+}
+
+/* 기존 동작에 소리·진동 연결 (함수 감싸기) */
+(function(){
+  var _pd=C.onpointerdown;
+  C.onpointerdown=function(e){
+    var m0=moves,l0=lock;
+    _pd.call(this,e);
+    if(!l0&&!lock){Snd.play('tap');haptic(8)}
+    setTimeout(tutRefresh,160);
+  };
+  var _power=power;power=function(){var s0=stars;_power.apply(this,arguments);if(stars>s0){Snd.play('star');haptic(12)}};
+  var _cel=celebrate;celebrate=function(){Snd.play('clear');haptic([30,60,30,60,60]);return _cel.apply(this,arguments)};
+  var _tp=takePhoto;takePhoto=function(){Snd.play('shutter');return _tp.apply(this,arguments)};
+  var _buy=buy;buy=function(k){var s0=stars;var r=_buy.apply(this,arguments);if(stars<s0){Snd.play('buy');haptic(15)}return r};
+  var _bd=buyDecor;buyDecor=function(k){var m0=moon;var r=_bd.apply(this,arguments);if(moon<m0){Snd.play('buy');haptic(15)}return r};
+  var _mk=make;make=function(){var r=_mk.apply(this,arguments);setTimeout(tutRefresh,50);return r};
+  var _sw=switchScreen;switchScreen=function(n){var r=_sw.apply(this,arguments);setTimeout(tutRefresh,50);return r};
+  // 조준 고리가 금색으로 바뀌는 순간 짧은 진동·소리
+  var vf=document.getElementById('viewfinder');
+  new MutationObserver(function(){if(vf.classList.contains('locked')){Snd.play('lock');haptic(10)}}).observe(vf,{attributes:true,attributeFilter:['class']});
+  // 상단 버튼류 클릭음
+  document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('button');if(b&&b.id!=='cameraBtn'&&!b.closest('#c'))Snd.play('ui')},true);
+})();
+
+/* 튜토리얼 */
+function tutSeen(){try{return JSON.parse(localStorage.pawTutSeen||'{}')}catch(e){return{}}}
+function tutMark(k){var s=tutSeen();s[k]=1;try{localStorage.pawTutSeen=JSON.stringify(s)}catch(e){}}
+function tutPlaceHand(i){
+  var cb=C.getBoundingClientRect(),sb=scene.getBoundingClientRect(),x=i%N,y=i/N|0;
+  handHint.style.left=(cb.left-sb.left+(x+.5)/N*cb.width)+'px';
+  handHint.style.top=(cb.top-sb.top+(y+.5)/N*cb.height)+'px';
+  handHint.style.display='block';
+}
+function tutRefresh(){
+  try{
+    var onPuzzle=document.getElementById('puzzleScreen').classList.contains('active');
+    var onHome=document.getElementById('homeScreen').classList.contains('active');
+    cameraBtn.classList.remove('pulse');
+    if(onHome){
+      coachCard.style.display='none';handHint.style.display='none';
+      var done=localStorage.pawTutDone==='1',seenTip=localStorage.pawHomeTip==='1';
+      if(done&&!seenTip){
+        homeTip.style.display='block';cameraBtn.classList.add('pulse');
+        clearTimeout(tutRefresh._t);
+        tutRefresh._t=setTimeout(function(){homeTip.style.display='none';cameraBtn.classList.remove('pulse');try{localStorage.pawHomeTip='1'}catch(e){}},9000);
+      }else homeTip.style.display='none';
+      return;
+    }
+    homeTip.style.display='none';
+    if(!onPuzzle){coachCard.style.display='none';handHint.style.display='none';return}
+    if(lock){handHint.style.display='none';return}
+    var text='';
+    if(localStorage.pawTutDone!=='1'){
+      var wrong=-1;
+      for(var i=0;i<cells.length;i++){if(!cells[i].locked&&cells[i].r!==0){wrong=i;break}}
+      if(moves===0){text='👆 <b>타일을 눌러서 돌려요.</b><br>왼쪽 위 시작점에서 <b>모든 타일</b>까지 별빛 길이 이어지면 성공!'}
+      else{text='✨ 빛이 닿은 타일은 밝게 켜져요. 아직 어두운 타일을 눌러 이어보세요.<br>💡 막히면 아래 <b>힌트</b>를 써도 괜찮아요.'}
+      if(wrong>=0)tutPlaceHand(wrong);else handHint.style.display='none';
+    }else{
+      handHint.style.display='none';
+      var seen=tutSeen(),has={};
+      cells.forEach(function(v){if(v.locked)has.lock=1;if(v.type==='star')has.star=1;if(v.type==='sleepy')has.sleepy=1;if(v.type==='cloud')has.cloud=1});
+      var info={lock:'🔒 <b>고정 타일</b>은 돌릴 수 없어요. 길을 계획할 때 기준점이 돼요.',
+                star:'⭐ <b>별 타일</b>에 빛이 닿으면 별을 모아요. 한 번 눌러 모양을 확인해보세요.',
+                sleepy:'😴 <b>졸린 타일</b>은 한 번 눌러 깨워야 돌릴 수 있어요.',
+                cloud:'☁️ <b>구름 타일</b>은 한 번 눌러야 안의 길이 보여요.'};
+      for(var k in info){if(has[k]&&!seen[k]&&moves<2){text=info[k];tutMark(k);tutRefresh._cur=k;break}}
+      if(!text&&tutRefresh._cur&&moves<2&&coachCard.style.display==='block')return; // 안내가 떠 있는 동안 유지
+      if(moves>=2)tutRefresh._cur=null;
+    }
+    if(text){coachCard.innerHTML=text;coachCard.style.display='block'}
+    else coachCard.style.display='none';
+  }catch(e){}
+}
+// 첫 클리어 후 튜토리얼 완료 처리
+(function(){
+  var _sc=showClear;
+  showClear=function(){try{localStorage.pawTutDone='1'}catch(e){}coachCard.style.display='none';handHint.style.display='none';return _sc.apply(this,arguments)};
+})();
+window.addEventListener('resize',function(){setTimeout(tutRefresh,100)});
+renderSettings();setTimeout(tutRefresh,300);
+
 </script><script>if('serviceWorker' in navigator&&location.protocol!=='file:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script></body></html>
