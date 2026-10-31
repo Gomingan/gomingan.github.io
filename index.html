@@ -139,10 +139,11 @@ body{min-height:100vh;min-height:100dvh}
 </div>
 
 </div>
-<div class=modal id=modal><div class=card><div style='font-size:52px'>😿</div><h3>앞발을 다 썼어요</h3><p id=fmsg></p><button class=ad onclick=extend()>▶ 광고 보상 +5 🐾</button><br><button onclick=retry()>다시 도전</button></div></div>
+<div class=modal id=modal><div class=card><div style='font-size:52px'>😿</div><h3>앞발을 다 썼어요</h3><p id=fmsg></p><button class=ad id=extBtn onclick=extend()>⭐ 5개로 +5 🐾 이어하기</button><br><button onclick=retry()>다시 도전</button></div></div>
 <div class=modal id=settingsModal><div class=card><h3>⚙️ 설정</h3>
 <div class=setRow><span>🔊 효과음</span><button id=setSfx onclick="toggleSetting('sfx')"></button></div>
 <div class=setRow><span>🎵 배경음</span><button id=setBgm onclick="toggleSetting('bgm')"></button></div>
+<div class=setRow><span>🌙 밤 모드 (작고 포근하게)</span><button id=setNight onclick="toggleSetting('night')"></button></div>
 <div class=setRow><span>📳 진동</span><button id=setHaptic onclick="toggleSetting('haptic')"></button></div>
 <div class=setNote id=hapticNote style="display:none">※ iPhone의 웹앱은 진동을 지원하지 않아요 (앱스토어 버전에서 지원 예정)</div>
 <div class=setRow><span>📖 튜토리얼</span><button onclick="resetTutorial()">다시 보기</button></div>
@@ -446,20 +447,20 @@ function retry(){load()}
 const con=i=>cells[i].b.map(d=>(d+cells[i].r)%4);
 function power(){cells.forEach(v=>v.on=false);cells[0].on=true;let q=[0];while(q.length){let a=q.shift(),x=a%N,y=a/N|0;for(const d of con(a)){let nx=x+D[d][0],ny=y+D[d][1];if(!ok(nx,ny))continue;let b=id(nx,ny);if(con(b).includes(O[d])&&!cells[b].on){cells[b].on=true;q.push(b)}}}
  cells.forEach(v=>{if(v.type==='star'&&v.on&&!v.collected){v.collected=true;stars++;wallet.textContent='⭐ '+stars;localStorage.pawStars=stars}});
- draw();if(!lock&&cells.every(v=>v.on)){lock=true;hist.push(1);hist=hist.slice(-10);let g=extended?1:moves<=minT+2?3:moves<=minT+5?2:1;stars+=g;streak++;if(streak>bestStreak)bestStreak=streak;wallet.textContent='⭐ '+stars;document.getElementById('streak').textContent='🔥 '+streak+' 연속';completeDailyIfNeeded();saveState();celebrate(g);return}if(!lock&&moves>=limit){lock=true;hist.push(0);hist=hist.slice(-10);streak=0;document.getElementById('streak').textContent='';saveState();setCat('sleep');fmsg.textContent='난이도 '+diffLabel(saved.target)+' 스테이지 · 광고 연장은 1회';setTimeout(()=>modal.classList.add('on'),180)}}
+ draw();if(!lock&&cells.every(v=>v.on)){lock=true;hist.push(1);hist=hist.slice(-10);let g=extended?1:moves<=minT+2?3:moves<=minT+5?2:1;stars+=g;streak++;if(streak>bestStreak)bestStreak=streak;wallet.textContent='⭐ '+stars;document.getElementById('streak').textContent='🔥 '+streak+' 연속';completeDailyIfNeeded();saveState();celebrate(g);return}if(!lock&&moves>=limit){lock=true;hist.push(0);hist=hist.slice(-10);streak=0;document.getElementById('streak').textContent='';saveState();setCat('sleep');fmsg.textContent='난이도 '+diffLabel(saved.target)+' 스테이지 · 이어하기는 한 판에 1회';setTimeout(()=>modal.classList.add('on'),180)}}
 function draw(){X.clearRect(0,0,420,420);let glow=themeData[curTheme].glow,warm=themeData[curTheme].warm;for(let y=0;y<N;y++)for(let x=0;x<N;x++){let i=id(x,y),v=cells[i],cx=x*S+S/2,cy=y*S+S/2;X.save();X.beginPath();X.rect(x*S+2,y*S+2,S-4,S-4);X.clip();X.drawImage(IMG.tile_empty,x*S+2,y*S+2,S-4,S-4);X.fillStyle=v.on?'rgba(255,210,120,.16)':'rgba(0,0,0,.4)';X.fillRect(x*S+2,y*S+2,S-4,S-4);X.restore();let covered=v.locked||(v.type==='star'&&!v.collected&&!v.revealed)||(v.type==='sleepy'&&v.sleep&&!v.revealed)||(v.type==='cloud'&&!v.revealed);
 if(!covered){X.strokeStyle=v.on?warm:'#5c647c';X.shadowColor=v.on?glow:'transparent';X.shadowBlur=v.on?12:0;X.lineWidth=Math.max(5,S*.1);X.lineCap='round';for(const d of con(i)){X.beginPath();X.moveTo(cx,cy);X.lineTo(cx+D[d][0]*S*.42,cy+D[d][1]*S*.42);X.stroke()}X.shadowBlur=0;X.fillStyle=v.on?'#fff5c1':'#7d8499';X.beginPath();X.arc(cx,cy,Math.max(5,S*.09),0,7);X.fill()}
 else{let ic=S-6,img=v.locked?IMG.tile_locked:v.type==='star'?IMG.tile_star:v.type==='sleepy'?IMG.tile_sleepy:IMG.tile_cloud1;X.drawImage(img,cx-ic/2,cy-ic/2,ic,ic)}}let left=Math.max(0,limit-moves);pawCount.textContent=left;pawCount.parentElement.style.color=left<=3?'#ff7788':'#fff';starCount2.textContent=stars;stageNum.textContent=st;diff.textContent=diffLabel(saved.target);let ar=actualRate();stat.textContent='목표승률 '+saved.target+'% · 최근실승률 '+(ar===null?'-':Math.round(ar*100)+'%')+' · 보정 '+(saved.adj>0?'↑':saved.adj<0?'↓':'=')+' · 최소턴 '+minT+' · LIMIT '+limit}
 function celebrate(g){const cr=C.getBoundingClientRect(),rr=cat.getBoundingClientRect(),tx=rr.left+rr.width/2,ty=rr.top+rr.height/2;const sc=document.querySelector('.scene');let clearedStage=st;lock=true;sc.classList.add('glow');msg.textContent='✨ 별빛 길 완성!';for(let k=0;k<6;k++){setTimeout(()=>{X.save();X.fillStyle='rgba(255,245,180,.22)';X.fillRect(0,0,420,420);X.restore();draw()},k*120)}setTimeout(()=>{setCat('receive');msg.textContent='⭐ 별빛이 깨어난다...'},500);setTimeout(()=>{for(let i=0;i<42;i++){let e=document.createElement('div');e.className='spark';e.textContent=Math.random()>.5?'⭐':'✦';let sx=cr.left+cr.width*Math.random(),sy=cr.top+cr.height*Math.random();e.style.left=sx+'px';e.style.top=sy+'px';e.style.fontSize=(12+Math.random()*20)+'px';document.body.appendChild(e);requestAnimationFrame(()=>requestAnimationFrame(()=>{e.style.transition='all 1.8s cubic-bezier(.2,.8,.2,1)';e.style.transform=`translate(${tx-sx}px,${ty-sy}px) scale(.2)`;e.style.opacity='0'}));setTimeout(()=>e.remove(),800)}},600);setTimeout(()=>{cat.style.transform='scale(1.15)';cat.style.filter='drop-shadow(0 0 10px #fff8b0) drop-shadow(0 0 30px #ffe27a) brightness(1.8)';msg.textContent='✨ 별빛 수집 완료!';},1200);setTimeout(()=>{document.body.style.transition='filter .5s';document.body.style.filter='brightness(1.7)'},1300);setTimeout(()=>{document.body.style.filter='';cat.style.transform='';cat.style.filter='';sc.classList.remove('glow');st++;saveState();showClear(g,clearedStage)},1600)}
 function showClear(g,stageNum){clearBg.src=ART.clearScene;document.querySelector('#clearScreen .clearTitle').textContent='STAGE '+stageNum+' CLEAR!';let filled='<span class=starFilled>⭐</span>'.repeat(g),empty='<span class=starEmpty>⭐</span>'.repeat(3-g);clearStars.innerHTML=filled+empty;let pawBonus=Math.max(0,g-1);pawTokens+=pawBonus;localStorage.pawTokens=pawTokens;clearReward.innerHTML='<span class=rewardItem>+'+g+' ⭐</span>'+(pawBonus>0?'<span class=rewardItem>+'+pawBonus+' 🐾</span>':'');switchScreen('clear')}
-function extend(){if(extended)return;extended=true;limit+=5;lock=false;modal.classList.remove('on');msg.textContent='광고 보상 +5 🐾';draw()}
+function extend(){if(extended)return;if(stars<5){fmsg.textContent='⭐ 별이 5개 필요해요 — 다시 도전해볼까요?';return}stars-=5;localStorage.pawStars=stars;wallet.textContent='⭐ '+stars;extended=true;limit+=5;lock=false;modal.classList.remove('on');msg.textContent='🐾 발 +5 — 다시 힘내봐요';draw()}
 function hint(){if(stars<5){msg.textContent='⭐ 힌트는 5개 필요해요';return}let cand=cells.map((v,i)=>i).filter(i=>!cells[i].locked&&cells[i].r!==0);if(!cand.length){msg.textContent='이미 다 맞았어요!';return}let i=cand[Math.random()*cand.length|0];cells[i].r=0;stars-=5;localStorage.pawStars=stars;wallet.textContent='⭐ '+stars;msg.textContent='💡 한 칸을 맞춰줬어요';setCat('paw');setTimeout(()=>{if(!lock)setCat('lookup')},500);power()}
 C.onpointerdown=e=>{if(lock)return;let r=C.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/r.width*N),y=Math.floor((e.clientY-r.top)/r.height*N),i=id(x,y);if(!ok(x,y)||cells[i].locked||moves>=limit)return;if(cells[i].type==='sleepy'&&cells[i].sleep){cells[i].sleep=false;cells[i].revealed=true;msg.textContent='😺 졸린 타일을 깨웠어';draw();return;}if(cells[i].type==='star'){cells[i].revealed=true;draw();}if(cells[i].type==='cloud'){cells[i].revealed=true;draw();}let cb=C.getBoundingClientRect(),sb=scene.getBoundingClientRect();paw.style.left=(cb.left-sb.left+(x+.5)/N*cb.width)+'px';paw.style.top=(cb.top-sb.top+(y+.5)/N*cb.height)+'px';paw.classList.add('on');setTimeout(()=>paw.classList.remove('on'),120);setTimeout(()=>{cells[i].r=(cells[i].r+1)%4;moves++;power()},65)};
 function instantClear(){if(lock)return;cells.forEach(v=>{if(!v.locked)v.r=0});power()}
 function start(){homeBg.src=ART.stageBg;homeCat.src=IMG.cat_idle.src;sceneImg.src=ART.stageBg;renderDecorSlot();make();switchScreen('home')}
 
 /* ===================== 소리 · 햅틱 · 설정 · 튜토리얼 ===================== */
-var SETTINGS=(function(){try{return Object.assign({sfx:true,bgm:true,haptic:true},JSON.parse(localStorage.pawSettings||'{}'))}catch(e){return{sfx:true,bgm:true,haptic:true}}})();
+var SETTINGS=(function(){try{return Object.assign({sfx:true,bgm:true,haptic:true,night:true},JSON.parse(localStorage.pawSettings||'{}'))}catch(e){return{sfx:true,bgm:true,haptic:true,night:true}}})();
 function saveSettings(){try{localStorage.pawSettings=JSON.stringify(SETTINGS)}catch(e){}}
 function haptic(ms){
   if(!SETTINGS.haptic)return;
@@ -470,54 +471,84 @@ function haptic(ms){
   }catch(e){}
 }
 var Snd=(function(){
-  var ctx=null,master=null,sfxBus=null,bgmBus=null,bgmTimer=null,step=0,note=2;
-  var SCALE=[261.63,293.66,329.63,392.00,440.00,523.25,587.33,659.25,783.99]; // C 펜타토닉
+  var ctx=null,master=null,sfxBus=null,bgmBus=null,verb=null,bgmTimer=null,nextChord=0,chordIdx=0,nextBell=0,windGain=null,windSrc=null;
+  // 밤 시간용: 낮은 음, 부드러운 시작, 긴 잔향. A마이너 계열 자장가 코드 진행
+  var CHORDS=[[174.61,220,261.63,329.63],[130.81,196,246.94,329.63],[110,164.81,196,261.63],[98,146.83,164.81,246.94]];
+  var BELLS=[440,523.25,587.33,659.25,784,880];
+  function vol(){return SETTINGS.night?0.42:0.8}
   function init(){
     if(ctx)return ctx;
     var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;
     try{
-      ctx=new AC();master=ctx.createGain();master.gain.value=.9;master.connect(ctx.destination);
-      var dl=ctx.createDelay(1);dl.delayTime.value=.32;var fb=ctx.createGain();fb.gain.value=.38;
-      var wet=ctx.createGain();wet.gain.value=.35;dl.connect(fb);fb.connect(dl);dl.connect(wet);wet.connect(master);
-      sfxBus=ctx.createGain();sfxBus.gain.value=.7;sfxBus.connect(master);sfxBus.connect(dl);
-      bgmBus=ctx.createGain();bgmBus.gain.value=.16;bgmBus.connect(master);bgmBus.connect(dl);
+      ctx=new AC();
+      master=ctx.createGain();master.gain.value=vol();
+      var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2600;lp.Q.value=.3;
+      master.connect(lp);lp.connect(ctx.destination);
+      // 합성 잔향(컨볼버): 감쇠하는 노이즈 임펄스
+      var len=ctx.sampleRate*3.2,buf=ctx.createBuffer(2,len,ctx.sampleRate);
+      for(var c=0;c<2;c++){var d=buf.getChannelData(c);for(var i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}
+      verb=ctx.createConvolver();verb.buffer=buf;var vg=ctx.createGain();vg.gain.value=.55;verb.connect(vg);vg.connect(master);
+      sfxBus=ctx.createGain();sfxBus.gain.value=.8;sfxBus.connect(master);sfxBus.connect(verb);
+      bgmBus=ctx.createGain();bgmBus.gain.value=.5;bgmBus.connect(master);bgmBus.connect(verb);
     }catch(e){ctx=null}
     return ctx;
   }
   function unlock(){var c=init();if(c&&c.state==='suspended')c.resume();applyBgm()}
-  function tone(f,t0,dur,vol,type,bus){
-    var o=ctx.createOscillator(),g=ctx.createGain();o.type=type||'sine';o.frequency.value=f;
-    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(vol,t0+.008);g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
-    o.connect(g);g.connect(bus||sfxBus);o.start(t0);o.stop(t0+dur+.05);
+  function env(g,t0,a,hold,rel,v){g.gain.setValueAtTime(0.0001,t0);g.gain.linearRampToValueAtTime(v,t0+a);g.gain.setValueAtTime(v,t0+a+hold);g.gain.exponentialRampToValueAtTime(.0001,t0+a+hold+rel)}
+  function tone(f,t0,a,hold,rel,v,bus,detune){
+    var o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=f;if(detune)o.detune.value=detune;
+    env(g,t0,a,hold,rel,v);o.connect(g);g.connect(bus||sfxBus);o.start(t0);o.stop(t0+a+hold+rel+.1);
   }
-  function seq(freqs,gap,dur,vol,type){var t=ctx.currentTime+.01;freqs.forEach(function(f,i){tone(f,t+i*gap,dur,vol,type)})}
+  function bell(f,t0,v,bus,len){tone(f,t0,.015,0,len||1.8,v,bus);tone(f*2.01,t0,.01,0,(len||1.8)*.45,v*.22,bus)} // 부드러운 종소리
+  function soft(t0,dur,v){ // 물방울/나무 톡 소리: 잡음 없이 짧게 내려가는 사인
+    var o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.setValueAtTime(420,t0);o.frequency.exponentialRampToValueAtTime(240,t0+dur);
+    env(g,t0,.006,0,dur,v);o.connect(g);g.connect(sfxBus);o.start(t0);o.stop(t0+dur+.05);
+  }
   var S={
-    tap:function(){tone(520,ctx.currentTime,.09,.22,'triangle');tone(780,ctx.currentTime+.03,.07,.1,'sine')},
-    star:function(){seq([880,1175,1568],.07,.25,.2,'sine')},
-    clear:function(){seq([523.25,659.25,783.99,1046.5,1318.5],.11,.7,.22,'triangle')},
-    shutter:function(){var t=ctx.currentTime;tone(1800,t,.04,.18,'square');tone(900,t+.05,.07,.14,'square');tone(1320,t+.2,.4,.12,'sine')},
-    lock:function(){tone(988,ctx.currentTime,.12,.16,'sine')},
-    miss:function(){tone(220,ctx.currentTime,.18,.12,'sine')},
-    ui:function(){tone(660,ctx.currentTime,.08,.14,'sine')},
-    buy:function(){seq([659.25,880,1318.5],.08,.3,.18,'triangle')},
-    fail:function(){seq([330,262],.14,.35,.16,'sine')}
+    tap:function(){soft(ctx.currentTime,.11,.2)},
+    star:function(){var t=ctx.currentTime;bell(659.25,t,.12);bell(987.77,t+.12,.1)},
+    clear:function(){var t=ctx.currentTime,n=[261.63,329.63,392,493.88,659.25];n.forEach(function(f,i){bell(f,t+i*.22,.12,null,3)})},
+    shutter:function(){var t=ctx.currentTime;soft(t,.05,.16);soft(t+.07,.09,.12);bell(523.25,t+.14,.08)},
+    lock:function(){bell(587.33,ctx.currentTime,.08,null,.9)},
+    miss:function(){soft(ctx.currentTime,.15,.08)},
+    ui:function(){soft(ctx.currentTime,.07,.1)},
+    buy:function(){var t=ctx.currentTime;bell(523.25,t,.1);bell(783.99,t+.1,.1)},
+    fail:function(){var t=ctx.currentTime;bell(329.63,t,.1,null,2.2);bell(261.63,t+.25,.1,null,2.6)}
   };
   function play(n){
     if(!SETTINGS.sfx)return;var c=init();if(!c||!S[n])return;
     if(c.state==='suspended')c.resume();
     try{S[n]()}catch(e){}
   }
+  function startWind(){
+    if(windSrc||!ctx)return;
+    var len=ctx.sampleRate*4,buf=ctx.createBuffer(1,len,ctx.sampleRate),d=buf.getChannelData(0),last=0;
+    for(var i=0;i<len;i++){last=(last+.02*(Math.random()*2-1))/1.02;d[i]=last*8}
+    windSrc=ctx.createBufferSource();windSrc.buffer=buf;windSrc.loop=true;
+    var f=ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=420;
+    windGain=ctx.createGain();windGain.gain.value=.0001;windGain.gain.linearRampToValueAtTime(.05,ctx.currentTime+4);
+    windSrc.connect(f);f.connect(windGain);windGain.connect(bgmBus);windSrc.start();
+  }
+  function stopWind(){if(windSrc){try{windGain.gain.linearRampToValueAtTime(.0001,ctx.currentTime+1);var w=windSrc;setTimeout(function(){try{w.stop()}catch(e){}},1200)}catch(e){}windSrc=null}}
   function bgmTick(){
     if(!ctx||ctx.state!=='running'||document.hidden)return;
-    var t=ctx.currentTime+.02;
-    note+=[-2,-1,-1,0,1,1,2][Math.random()*7|0];note=Math.max(0,Math.min(SCALE.length-1,note));
-    if(step%4!==3||Math.random()<.4){tone(SCALE[note],t,1.6,.5,'triangle',bgmBus);tone(SCALE[note]*2,t,.8,.12,'sine',bgmBus)}
-    if(step%8===0)tone(SCALE[0]/2,t,3,.35,'sine',bgmBus);
-    step++;
+    var now=ctx.currentTime;
+    if(nextChord<now+1.5){
+      var t=Math.max(nextChord,now+.05),ch=CHORDS[chordIdx%CHORDS.length];
+      ch.forEach(function(f,i){tone(f,t,3.2,1.8,3.6,i===0?.07:.05,bgmBus,(i-1.5)*3)});
+      chordIdx++;nextChord=t+8;nextBell=Math.max(nextBell,t+1.5);
+    }
+    if(nextBell<now+1.5){
+      var tb=Math.max(nextBell,now+.05);
+      if(Math.random()<.75)bell(BELLS[Math.random()*BELLS.length|0],tb,SETTINGS.night?.05:.07,bgmBus,3.2);
+      nextBell=tb+2.6+Math.random()*3.2;
+    }
   }
   function applyBgm(){
     if(bgmTimer){clearInterval(bgmTimer);bgmTimer=null}
-    if(SETTINGS.bgm&&ctx)bgmTimer=setInterval(bgmTick,680);
+    if(master)master.gain.value=vol();
+    if(SETTINGS.bgm&&ctx){nextChord=Math.max(nextChord,ctx.currentTime);startWind();bgmTimer=setInterval(bgmTick,400);bgmTick()}
+    else stopWind();
   }
   return {init:init,unlock:unlock,play:play,applyBgm:applyBgm,state:function(){return ctx?ctx.state:'none'}};
 })();
@@ -526,13 +557,13 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden)Snd.
 
 /* 설정 창 */
 function renderSettings(){
-  [['setSfx','sfx'],['setBgm','bgm'],['setHaptic','haptic']].forEach(function(p){
+  [['setSfx','sfx'],['setBgm','bgm'],['setHaptic','haptic'],['setNight','night']].forEach(function(p){
     var b=document.getElementById(p[0]);b.textContent=SETTINGS[p[1]]?'켜짐':'꺼짐';b.classList.toggle('on',!!SETTINGS[p[1]]);
   });
   hapticNote.style.display=(!navigator.vibrate&&!(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Haptics))?'block':'none';
 }
 function openSettings(){renderSettings();settingsModal.classList.add('on');Snd.play('ui')}
-function toggleSetting(k){SETTINGS[k]=!SETTINGS[k];saveSettings();renderSettings();Snd.unlock();if(k==='bgm')Snd.applyBgm();if(k==='haptic')haptic(30);if(k==='sfx')Snd.play('ui')}
+function toggleSetting(k){SETTINGS[k]=!SETTINGS[k];saveSettings();renderSettings();Snd.unlock();if(k==='bgm'||k==='night')Snd.applyBgm();if(k==='haptic')haptic(30);if(k==='sfx')Snd.play('ui')}
 function resetTutorial(){localStorage.removeItem('pawTutDone');localStorage.removeItem('pawTutSeen');localStorage.removeItem('pawHomeTip');settingsModal.classList.remove('on');make();switchScreen('puzzle');tutRefresh()}
 function resetData(){
   if(!confirm('모든 진행 상황(별, 달빛, 사진, 스테이지)이 지워져요. 정말 초기화할까요?'))return;

@@ -1,0 +1,7 @@
+{
+  "appId": "com.pawlight.game",
+  "appName": "Pawlight",
+  "webDir": "www",
+  "backgroundColor": "#11162d",
+  "android": { "backgroundColor": "#11162d" }
+}
