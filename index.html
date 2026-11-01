@@ -79,7 +79,7 @@ body{min-height:100vh;min-height:100dvh}
 #puzzleScreen .winSlot{left:49.08%;top:49.1%;width:60%;height:auto;aspect-ratio:1/1;transform:translate(-50%,-50%);display:block}
 #puzzleScreen .winSlot canvas{width:100%;height:100%;aspect-ratio:1/1;background:#15192dd9;border-radius:12px}
 .cat{pointer-events:none}
-.legendCard{right:auto;left:50%;top:1.6%;transform:translateX(-50%);display:flex;gap:9px;padding:5px 10px;line-height:1.2;white-space:nowrap;font-size:10.5px}
+.legendCard{right:auto;left:50%;top:1.6%;transform:translateX(-50%);display:flex;gap:7px;padding:5px 9px;line-height:1.2;white-space:nowrap;font-size:10px}
 .top{gap:4px}.topBtns{display:flex;gap:2px}
 /* ===== 설정 / 튜토리얼 ===== */
 .setRow{display:flex;justify-content:space-between;align-items:center;margin:10px 0;font-size:14px;text-align:left}
@@ -91,15 +91,47 @@ body{min-height:100vh;min-height:100dvh}
 .homeTip{display:none;font-size:12px;color:#ffdda7;background:#1c1f38cc;border-radius:12px;padding:8px 12px;margin:8px 0 0;line-height:1.5}
 .cameraBtn.pulse{animation:camPulse 1.6s infinite}
 @keyframes camPulse{0%{box-shadow:0 0 0 0 #ffd45cbb}70%{box-shadow:0 0 0 14px #ffd45c00}100%{box-shadow:0 0 0 0 #ffd45c00}}
+
+#homeCat{transition:left 1.2s ease-in-out}
+.decorItem.wiggle.p-roll{animation:dRoll 1.8s ease-in-out}
+.decorItem.wiggle.p-hop{animation:dHop .55s ease-in-out 4}
+.decorItem.wiggle.p-sway{animation:dSway 1s ease-in-out 3}
+@keyframes dRoll{0%{transform:translateX(0) rotate(0)}35%{transform:translateX(-46px) rotate(-420deg)}70%{transform:translateX(-10px) rotate(-90deg)}100%{transform:translateX(0) rotate(0)}}
+@keyframes dHop{0%,100%{transform:translateY(0) rotate(-10deg)}50%{transform:translateY(-22px) rotate(14deg)}}
+@keyframes dSway{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(14deg) translateY(-4px)}}
+.playFx{position:absolute;z-index:6;pointer-events:none;font-size:20px;animation:fxUp 1.6s ease-out forwards}
+@keyframes fxUp{0%{opacity:0;transform:translateY(0)}20%{opacity:1}100%{opacity:0;transform:translateY(-46px)}}
+
+#homeCat{pointer-events:auto;cursor:pointer;transform-origin:50% 100%;-webkit-tap-highlight-color:transparent}
+#homeCat.pet{animation:petSq .45s ease-out}
+@keyframes petSq{0%{transform:scale(1)}30%{transform:scale(1.05,.92)}65%{transform:scale(.98,1.03)}100%{transform:scale(1)}}
+.playFx.big{font-size:28px}
+
+/* 숨쉬기: transform 과 별개인 scale 속성을 써서 클리어/쓰다듬기 연출과 겹치지 않게 */
+#homeCat,#cat{transform-origin:50% 100%;--b:.02;animation:breathe 4.2s ease-in-out infinite}
+#homeCat[data-pose=sleep],#cat[data-pose=sleep]{--b:.04;animation-duration:6.2s}
+#homeCat[data-pose=paw],#cat[data-pose=paw],#homeCat[data-pose=receive],#cat[data-pose=receive]{--b:.012;animation-duration:3.4s}
+#homeCat.pet{animation:petSq .45s ease-out}
+@keyframes breathe{0%,100%{scale:1 1}50%{scale:1 calc(1 + var(--b))}}
+@media (prefers-reduced-motion:reduce){#homeCat,#cat{animation:none}}
+
+#cat.hop{animation:catHop .5s ease-out}
+@keyframes catHop{0%{transform:translateY(0)}35%{transform:translateY(-14px)}70%{transform:translateY(0) scale(1.03,.96)}100%{transform:translateY(0)}}
+
+.affRow{font-size:12px;color:#ffc4dd;margin:6px 0 0;display:flex;align-items:center;gap:8px;justify-content:center}
+.affBar{display:inline-block;width:90px;height:7px;border-radius:5px;background:#ffffff22;overflow:hidden}.affBar i{display:block;height:100%;background:linear-gradient(90deg,#ff8fb8,#ffd1e3)}
+.affNum{color:#8b90ad;font-size:11px}
+.weeklyBtn{display:block;margin:8px auto 0;background:#6d55d9;border-radius:10px;padding:8px 18px;font-size:13px}
 </style></head>
 <body><div id=a>
 <div class=top id=topbar><b>🐾 PAWLIGHT</b><span id=wallet>⭐ 0</span><span id=moonWallet>🌙 0</span><span class=topBtns><button id=shopBtn>🛍️</button><button id=settingsBtn onclick="openSettings()">⚙️</button><button id=dbgBtn style="display:none">🐞</button></span></div>
 
 <div id=homeScreen class="screen active">
   <div class=homeScene><img class=bg id=homeBg src=""><img class=cat id=homeCat src="" style="left:37%;bottom:13%;height:20%;width:auto"><div id=decorSlot></div><div class=viewfinder id=viewfinder></div><button class=cameraBtn id=cameraBtn onclick="enterAimMode()">📷</button><button class=aimCancel id=aimCancel onclick="cancelAim()" style="display:none">✕</button></div>
-  <div class=photoToast id=photoToast></div><div class=homeTip id=homeTip>👋 "퍼즐하기"로 별빛 길을 이어주고, 📷으로 고양이의 귀여운 순간을 찍어보세요</div>
+  <div class=photoToast id=photoToast></div><div class=affRow id=affRow></div><div class=homeTip id=homeTip>👋 "퍼즐하기"로 별빛 길을 이어주고, 📷으로 귀여운 순간을 찍어보세요. 고양이를 톡 쓰다듬을 수도 있어요</div>
   <p class=tagline>작은 별빛이, 더 따뜻한 하루를 만들어줘.</p>
   <div class=dailyCard id=dailyCard></div>
+  <div class=dailyCard id=weeklyCard style="margin-top:6px"></div>
   <button class=bigBtn onclick="goPuzzle()">🌙 &nbsp;퍼즐하기</button>
   <button class=bigBtn onclick="openShop('theme')">🧺 &nbsp;방 꾸미기</button>
   <button class=bigBtn onclick="openMemory()">📖 &nbsp;작은 추억</button>
@@ -118,7 +150,7 @@ body{min-height:100vh;min-height:100dvh}
     <div class=winSlot><canvas id=c width=420 height=420></canvas></div>
     <img class=cat id=cat src="" style="left:40%;bottom:1%;height:15%;width:auto">
     <div class=paw id=paw>🐾</div><div class=handHint id=handHint>👆</div>
-    <div class=legendCard><span>🔒 고정</span><span>⭐ 별</span><span>😴 졸림</span><span>☁️ 구름</span><span>✨ 반짝이</span></div>
+    <div class=legendCard><span>🔒 고정</span><span>⭐ 별</span><span>😴 졸림</span><span>☁️ 구름</span><span>🔁 거울</span></div>
     <button class=testBtn onclick="instantClear()" style="display:none">🧪 바로 클리어</button>
   </div>
   <div class=coachCard id=coachCard></div><div class=msg id=msg></div><div class=bar><span id=diff></span><span id=streak class=streak></span></div>
@@ -139,7 +171,7 @@ body{min-height:100vh;min-height:100dvh}
 </div>
 
 </div>
-<div class=modal id=modal><div class=card><div style='font-size:52px'>😿</div><h3>앞발을 다 썼어요</h3><p id=fmsg></p><button class=ad id=extBtn onclick=extend()>⭐ 5개로 +5 🐾 이어하기</button><br><button onclick=retry()>다시 도전</button></div></div>
+<div class=modal id=modal><div class=card><div style='font-size:52px'>😿</div><h3>괜찮아요, 천천히 해요</h3><p id=fmsg></p><button onclick=retry()>🔄 같은 판 다시 도전</button><br><button class=ad id=extBtn onclick=extend()>⭐ 5개로 +5 🐾 이어하기</button><br><button onclick="modal.classList.remove('on');switchScreen('home')">🏠 방에서 쉬기</button></div></div>
 <div class=modal id=settingsModal><div class=card><h3>⚙️ 설정</h3>
 <div class=setRow><span>🔊 효과음</span><button id=setSfx onclick="toggleSetting('sfx')"></button></div>
 <div class=setRow><span>🎵 배경음</span><button id=setBgm onclick="toggleSetting('bgm')"></button></div>
@@ -187,6 +219,17 @@ function gridSizeForStage(stage){
 // 한 판에 등장하는 특수 타일 개수를 "그리드 전체 칸수의 몇 %까지" 허용할지 정합니다.
 // 예: 0.15 = 최대 15%. 이 숫자만 바꾸면 전체 특수 타일 밀도가 조절됩니다.
 const SPECIAL_TILE_RATIO = 0.15;
+// ===== 거울 타일: 누르면 자기 자신과 상하좌우 이웃 타일(고정 제외)이 함께 돌아가요 =====
+// fromStage 이후에만 나오고, 한 판 최대 max개. 특수 타일 15% 상한 안에서 자리를 나눠 씁니다.
+const MIRROR_TILE = {enabled:true, fromStage:8, max:2};
+function mirrorCount(sl,z){if(!MIRROR_TILE.enabled)return 0;if(z.forceMirror!==undefined)return Math.min(z.forceMirror,sl);return st>=MIRROR_TILE.fromStage?Math.min(MIRROR_TILE.max,Math.ceil(sl/3)):0}
+function rotPress(i){
+  cells[i].r=(cells[i].r+1)%4;
+  if(cells[i].type==='mirror'){
+    let x=i%N,y=i/N|0;
+    for(const d of D){let nx=x+d[0],ny=y+d[1];if(ok(nx,ny)){let j=id(nx,ny);if(!cells[j].locked)cells[j].r=(cells[j].r+1)%4}}
+  }
+}
 
 // ===== 오늘의 별빛 임무 =====
 const DAILY_MISSION = {rewardMoon:5, desc:'스테이지 1개 클리어하기'};
@@ -209,7 +252,15 @@ const decorItems = {
   yarn:{name:'실뭉치', emoji:'🧶', cost:20},
   fish:{name:'물고기 장난감', emoji:'🐟', cost:30},
   plant:{name:'화분', emoji:'🪴', cost:15},
-  basket:{name:'바구니', emoji:'🧺', cost:25}
+  basket:{name:'바구니', emoji:'🧺', cost:25},
+  lantern:{name:'작은 등불', emoji:'🏮', cost:0, weekly:true},
+  pumpkin:{name:'호박', emoji:'🎃', cost:0, weekly:true},
+  tree:{name:'작은 트리', emoji:'🎄', cost:0, weekly:true},
+  cake:{name:'케이크', emoji:'🎂', cost:0, weekly:true},
+  bunny:{name:'달토끼 인형', emoji:'🐇', cost:0, weekly:true},
+  kite:{name:'연', emoji:'🪁', cost:0, weekly:true},
+  snow:{name:'눈사람', emoji:'⛄', cost:0, weekly:true},
+  flower:{name:'꽃다발', emoji:'💐', cost:0, weekly:true}
 };
 function renderDecorSlot(){
   decorSlot.innerHTML = equippedDecor.map((k,idx)=>{
@@ -428,7 +479,7 @@ function renderShop(){
   if(shopTab==='theme'){
     let h='';for(const k in themeData){let t=themeData[k],own=owned.includes(k),eq=curTheme===k;h+=`<div class=shopRow><span>${t.name}</span><button onclick="buy('${k}')">${eq?'적용중':own?'적용':t.cost+'⭐'}</button></div>`}shopList.innerHTML=h
   } else {
-    let h='';for(const k in decorItems){let d=decorItems[k],own=ownedDecor.includes(k),eq=equippedDecor.includes(k);h+=`<div class=shopRow><span>${d.emoji} ${d.name}</span><button onclick="buyDecor('${k}')">${own?(eq?'놓는 중':'놓기'):d.cost+'🌙'}</button></div>`}shopList.innerHTML=h
+    let h='';for(const k in decorItems){let d=decorItems[k],own=ownedDecor.includes(k),eq=equippedDecor.includes(k);if(d.weekly&&!own)continue;h+=`<div class=shopRow><span>${d.emoji} ${d.name}</span><button onclick="buyDecor('${k}')">${own?(eq?'놓는 중':'놓기'):d.cost+'🌙'}</button></div>`}shopList.innerHTML=h
   }
 }
 function buy(k){let data=themeData[k];
@@ -441,21 +492,24 @@ function diffLabel(t){return t>=75?'쉬움 🟢':t>=50?'보통 🟡':t>=32?'어�
 function actualRate(){let h=hist.slice(-10);return h.length?h.reduce((a,b)=>a+b,0)/h.length:null}
 function saveState(){localStorage.pawHist=JSON.stringify(hist.slice(-10));localStorage.pawStars=stars;localStorage.pawStage=st;localStorage.pawStreak=streak;localStorage.pawBest=bestStreak}
 function cfg(){let curve=DIFFICULTY_CONFIG.winRateByStage;let base=curve[(st-1)%curve.length],ar=actualRate(),adj=0;if(DIFFICULTY_CONFIG.useAdaptiveAdjustment&&hist.length>=4){if(ar>.80)adj=1;else if(ar<.45)adj=-1}let target=Math.max(DIFFICULTY_CONFIG.minWinRate,Math.min(DIFFICULTY_CONFIG.maxWinRate,base-adj*10)),size=gridSizeForStage(st);size=Math.max(4,Math.min(7,size+adj));let slack=target>=90?12:target>=75?9:target>=60?7:target>=45?5:target>=32?4:3;let fixed=target>=75?0:target>=50?2:target>=32?4:6;let special=Math.max(0,Math.floor((100-target)/18)+adj);return{target,size,slack,fixed,special,adj}}
-function make(){let z=cfg();N=z.size;S=420/N;let E=Array.from({length:N*N},()=>new Set),seen=new Set([0]),f=[0];while(seen.size<N*N){let a=f[Math.random()*f.length|0],x=a%N,y=a/N|0,cc=[];for(let d=0;d<4;d++){let nx=x+D[d][0],ny=y+D[d][1],b=id(nx,ny);if(ok(nx,ny)&&!seen.has(b))cc.push([d,b])}if(!cc.length){f.splice(f.indexOf(a),1);continue}let [d,b]=cc[Math.random()*cc.length|0];E[a].add(d);E[b].add(O[d]);seen.add(b);f.push(b)}let R=E.map(()=>Math.random()*4|0);let locked=new Set;let candidates=[...Array(N*N).keys()].filter(i=>i!==0&&R[i]===0);for(let i=0;i<z.fixed&&candidates.length;i++){let k=Math.random()*candidates.length|0;locked.add(candidates.splice(k,1)[0])}let types=Array(N*N).fill('normal'),pool=[...Array(N*N).keys()].filter(i=>i!==0&&!locked.has(i));let specialLimit=Math.min(pool.length,Math.floor(N*N*SPECIAL_TILE_RATIO),z.special);for(let k=0;k<specialLimit&&pool.length;k++){let j=Math.random()*pool.length|0,i=pool.splice(j,1)[0];types[i]=['star','sleepy','cloud'][k%3]}minT=R.reduce((a,r,i)=>a+(locked.has(i)?0:(4-r)%4),0);limit=minT+z.slack;saved={E:E.map(e=>[...e]),R:[...R],locked:[...locked],types,minT,limit,N,target:z.target,adj:z.adj};load()}
+function make(){let z=cfg();N=z.size;S=420/N;let E=Array.from({length:N*N},()=>new Set),seen=new Set([0]),f=[0];while(seen.size<N*N){let a=f[Math.random()*f.length|0],x=a%N,y=a/N|0,cc=[];for(let d=0;d<4;d++){let nx=x+D[d][0],ny=y+D[d][1],b=id(nx,ny);if(ok(nx,ny)&&!seen.has(b))cc.push([d,b])}if(!cc.length){f.splice(f.indexOf(a),1);continue}let [d,b]=cc[Math.random()*cc.length|0];E[a].add(d);E[b].add(O[d]);seen.add(b);f.push(b)}let R=E.map(()=>Math.random()*4|0);let locked=new Set;let candidates=[...Array(N*N).keys()].filter(i=>i!==0&&R[i]===0);for(let i=0;i<z.fixed&&candidates.length;i++){let k=Math.random()*candidates.length|0;locked.add(candidates.splice(k,1)[0])}let types=Array(N*N).fill('normal'),pool=[...Array(N*N).keys()].filter(i=>i!==0&&!locked.has(i));let specialLimit=Math.min(pool.length,Math.floor(N*N*SPECIAL_TILE_RATIO),z.special);let mirrorN=mirrorCount(specialLimit,z);for(let k=0;k<specialLimit&&pool.length;k++){let j=Math.random()*pool.length|0,i=pool.splice(j,1)[0];types[i]=(k<mirrorN)?'mirror':['star','sleepy','cloud'][(k-mirrorN)%3]}
+let sol=Array(N*N).fill(0);for(let i=0;i<N*N;i++){if(locked.has(i))continue;sol[i]=types[i]==='mirror'?1+(Math.random()*3|0):(4-R[i])%4}
+let acc=Array(N*N).fill(0);for(let i=0;i<N*N;i++){if(!sol[i])continue;acc[i]+=sol[i];if(types[i]==='mirror'){for(const d of D){let nx=i%N+d[0],ny=(i/N|0)+d[1];if(ok(nx,ny)&&!locked.has(id(nx,ny)))acc[id(nx,ny)]+=sol[i]}}}
+R=R.map((r,i)=>locked.has(i)?0:(4-acc[i]%4)%4);minT=sol.reduce((a,b)=>a+b,0);limit=minT+z.slack;saved={E:E.map(e=>[...e]),R:[...R],locked:[...locked],types,minT,limit,N,target:z.target,adj:z.adj,sol};load()}
 function load(){N=saved.N;S=420/N;cells=saved.E.map((b,i)=>({b:[...b],r:saved.R[i],on:false,locked:saved.locked.includes(i),type:(saved.types||[])[i]||'normal',sleep:(saved.types||[])[i]==='sleepy',revealed:false,collected:false}));minT=saved.minT;limit=saved.limit;moves=0;lock=false;extended=false;modal.classList.remove('on');setCat('lookup');msg.textContent='별빛 길을 이어줘';power()}
 function retry(){load()}
 const con=i=>cells[i].b.map(d=>(d+cells[i].r)%4);
 function power(){cells.forEach(v=>v.on=false);cells[0].on=true;let q=[0];while(q.length){let a=q.shift(),x=a%N,y=a/N|0;for(const d of con(a)){let nx=x+D[d][0],ny=y+D[d][1];if(!ok(nx,ny))continue;let b=id(nx,ny);if(con(b).includes(O[d])&&!cells[b].on){cells[b].on=true;q.push(b)}}}
  cells.forEach(v=>{if(v.type==='star'&&v.on&&!v.collected){v.collected=true;stars++;wallet.textContent='⭐ '+stars;localStorage.pawStars=stars}});
- draw();if(!lock&&cells.every(v=>v.on)){lock=true;hist.push(1);hist=hist.slice(-10);let g=extended?1:moves<=minT+2?3:moves<=minT+5?2:1;stars+=g;streak++;if(streak>bestStreak)bestStreak=streak;wallet.textContent='⭐ '+stars;document.getElementById('streak').textContent='🔥 '+streak+' 연속';completeDailyIfNeeded();saveState();celebrate(g);return}if(!lock&&moves>=limit){lock=true;hist.push(0);hist=hist.slice(-10);streak=0;document.getElementById('streak').textContent='';saveState();setCat('sleep');fmsg.textContent='난이도 '+diffLabel(saved.target)+' 스테이지 · 이어하기는 한 판에 1회';setTimeout(()=>modal.classList.add('on'),180)}}
+ draw();if(!lock&&cells.every(v=>v.on)){lock=true;hist.push(1);hist=hist.slice(-10);let g=extended?1:moves<=minT+2?3:moves<=minT+5?2:1;stars+=g;streak++;if(streak>bestStreak)bestStreak=streak;wallet.textContent='⭐ '+stars;document.getElementById('streak').textContent='🔥 '+streak+' 연속';completeDailyIfNeeded();saveState();celebrate(g);return}if(!lock&&moves>=limit){lock=true;hist.push(0);hist=hist.slice(-10);saveState();setCat('sleep');failMsg();setTimeout(()=>modal.classList.add('on'),180)}}
 function draw(){X.clearRect(0,0,420,420);let glow=themeData[curTheme].glow,warm=themeData[curTheme].warm;for(let y=0;y<N;y++)for(let x=0;x<N;x++){let i=id(x,y),v=cells[i],cx=x*S+S/2,cy=y*S+S/2;X.save();X.beginPath();X.rect(x*S+2,y*S+2,S-4,S-4);X.clip();X.drawImage(IMG.tile_empty,x*S+2,y*S+2,S-4,S-4);X.fillStyle=v.on?'rgba(255,210,120,.16)':'rgba(0,0,0,.4)';X.fillRect(x*S+2,y*S+2,S-4,S-4);X.restore();let covered=v.locked||(v.type==='star'&&!v.collected&&!v.revealed)||(v.type==='sleepy'&&v.sleep&&!v.revealed)||(v.type==='cloud'&&!v.revealed);
-if(!covered){X.strokeStyle=v.on?warm:'#5c647c';X.shadowColor=v.on?glow:'transparent';X.shadowBlur=v.on?12:0;X.lineWidth=Math.max(5,S*.1);X.lineCap='round';for(const d of con(i)){X.beginPath();X.moveTo(cx,cy);X.lineTo(cx+D[d][0]*S*.42,cy+D[d][1]*S*.42);X.stroke()}X.shadowBlur=0;X.fillStyle=v.on?'#fff5c1':'#7d8499';X.beginPath();X.arc(cx,cy,Math.max(5,S*.09),0,7);X.fill()}
+if(!covered){X.save();{let _a=rotAng(v);if(_a){X.translate(cx,cy);X.rotate(_a);X.translate(-cx,-cy)}}X.strokeStyle=v.on?warm:'#5c647c';X.shadowColor=v.on?glow:'transparent';X.shadowBlur=v.on?12:0;X.lineWidth=Math.max(5,S*.1);X.lineCap='round';for(const d of con(i)){X.beginPath();X.moveTo(cx,cy);X.lineTo(cx+D[d][0]*S*.42,cy+D[d][1]*S*.42);X.stroke()}X.shadowBlur=0;X.fillStyle=v.on?'#fff5c1':'#7d8499';X.beginPath();X.arc(cx,cy,Math.max(5,S*.09),0,7);X.fill();X.restore();if(v.type==='mirror')mirrorBadge(cx,cy,v.on)}
 else{let ic=S-6,img=v.locked?IMG.tile_locked:v.type==='star'?IMG.tile_star:v.type==='sleepy'?IMG.tile_sleepy:IMG.tile_cloud1;X.drawImage(img,cx-ic/2,cy-ic/2,ic,ic)}}let left=Math.max(0,limit-moves);pawCount.textContent=left;pawCount.parentElement.style.color=left<=3?'#ff7788':'#fff';starCount2.textContent=stars;stageNum.textContent=st;diff.textContent=diffLabel(saved.target);let ar=actualRate();stat.textContent='목표승률 '+saved.target+'% · 최근실승률 '+(ar===null?'-':Math.round(ar*100)+'%')+' · 보정 '+(saved.adj>0?'↑':saved.adj<0?'↓':'=')+' · 최소턴 '+minT+' · LIMIT '+limit}
 function celebrate(g){const cr=C.getBoundingClientRect(),rr=cat.getBoundingClientRect(),tx=rr.left+rr.width/2,ty=rr.top+rr.height/2;const sc=document.querySelector('.scene');let clearedStage=st;lock=true;sc.classList.add('glow');msg.textContent='✨ 별빛 길 완성!';for(let k=0;k<6;k++){setTimeout(()=>{X.save();X.fillStyle='rgba(255,245,180,.22)';X.fillRect(0,0,420,420);X.restore();draw()},k*120)}setTimeout(()=>{setCat('receive');msg.textContent='⭐ 별빛이 깨어난다...'},500);setTimeout(()=>{for(let i=0;i<42;i++){let e=document.createElement('div');e.className='spark';e.textContent=Math.random()>.5?'⭐':'✦';let sx=cr.left+cr.width*Math.random(),sy=cr.top+cr.height*Math.random();e.style.left=sx+'px';e.style.top=sy+'px';e.style.fontSize=(12+Math.random()*20)+'px';document.body.appendChild(e);requestAnimationFrame(()=>requestAnimationFrame(()=>{e.style.transition='all 1.8s cubic-bezier(.2,.8,.2,1)';e.style.transform=`translate(${tx-sx}px,${ty-sy}px) scale(.2)`;e.style.opacity='0'}));setTimeout(()=>e.remove(),800)}},600);setTimeout(()=>{cat.style.transform='scale(1.15)';cat.style.filter='drop-shadow(0 0 10px #fff8b0) drop-shadow(0 0 30px #ffe27a) brightness(1.8)';msg.textContent='✨ 별빛 수집 완료!';},1200);setTimeout(()=>{document.body.style.transition='filter .5s';document.body.style.filter='brightness(1.7)'},1300);setTimeout(()=>{document.body.style.filter='';cat.style.transform='';cat.style.filter='';sc.classList.remove('glow');st++;saveState();showClear(g,clearedStage)},1600)}
 function showClear(g,stageNum){clearBg.src=ART.clearScene;document.querySelector('#clearScreen .clearTitle').textContent='STAGE '+stageNum+' CLEAR!';let filled='<span class=starFilled>⭐</span>'.repeat(g),empty='<span class=starEmpty>⭐</span>'.repeat(3-g);clearStars.innerHTML=filled+empty;let pawBonus=Math.max(0,g-1);pawTokens+=pawBonus;localStorage.pawTokens=pawTokens;clearReward.innerHTML='<span class=rewardItem>+'+g+' ⭐</span>'+(pawBonus>0?'<span class=rewardItem>+'+pawBonus+' 🐾</span>':'');switchScreen('clear')}
-function extend(){if(extended)return;if(stars<5){fmsg.textContent='⭐ 별이 5개 필요해요 — 다시 도전해볼까요?';return}stars-=5;localStorage.pawStars=stars;wallet.textContent='⭐ '+stars;extended=true;limit+=5;lock=false;modal.classList.remove('on');msg.textContent='🐾 발 +5 — 다시 힘내봐요';draw()}
-function hint(){if(stars<5){msg.textContent='⭐ 힌트는 5개 필요해요';return}let cand=cells.map((v,i)=>i).filter(i=>!cells[i].locked&&cells[i].r!==0);if(!cand.length){msg.textContent='이미 다 맞았어요!';return}let i=cand[Math.random()*cand.length|0];cells[i].r=0;stars-=5;localStorage.pawStars=stars;wallet.textContent='⭐ '+stars;msg.textContent='💡 한 칸을 맞춰줬어요';setCat('paw');setTimeout(()=>{if(!lock)setCat('lookup')},500);power()}
-C.onpointerdown=e=>{if(lock)return;let r=C.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/r.width*N),y=Math.floor((e.clientY-r.top)/r.height*N),i=id(x,y);if(!ok(x,y)||cells[i].locked||moves>=limit)return;if(cells[i].type==='sleepy'&&cells[i].sleep){cells[i].sleep=false;cells[i].revealed=true;msg.textContent='😺 졸린 타일을 깨웠어';draw();return;}if(cells[i].type==='star'){cells[i].revealed=true;draw();}if(cells[i].type==='cloud'){cells[i].revealed=true;draw();}let cb=C.getBoundingClientRect(),sb=scene.getBoundingClientRect();paw.style.left=(cb.left-sb.left+(x+.5)/N*cb.width)+'px';paw.style.top=(cb.top-sb.top+(y+.5)/N*cb.height)+'px';paw.classList.add('on');setTimeout(()=>paw.classList.remove('on'),120);setTimeout(()=>{cells[i].r=(cells[i].r+1)%4;moves++;power()},65)};
+function extend(){if(extended)return;let cost=failN>=2?0:5;if(stars<cost){fmsg.textContent='⭐ 별이 5개 필요해요 — 같은 판을 다시 도전해볼까요?';return}stars-=cost;localStorage.pawStars=stars;wallet.textContent='⭐ '+stars;extended=true;limit+=5;lock=false;modal.classList.remove('on');msg.textContent='🐾 발 +5 — 다시 힘내봐요';draw()}
+function hint(){if(stars<5){msg.textContent='⭐ 힌트는 5개 필요해요';return}let cand=cells.map((v,i)=>i).filter(i=>!cells[i].locked&&cells[i].r!==0&&cells[i].type!=='mirror');if(!cand.length){msg.textContent=cells.some(v=>v.type==='mirror'&&v.r!==0)?'🔁 거울 타일은 직접 맞춰야 해요':'이미 다 맞았어요!';return}let i=cand[Math.random()*cand.length|0];cells[i].r=0;stars-=5;localStorage.pawStars=stars;wallet.textContent='⭐ '+stars;msg.textContent='💡 한 칸을 맞춰줬어요';setCat('paw');setTimeout(()=>{if(!lock)setCat('lookup')},500);power()}
+C.onpointerdown=e=>{if(lock)return;let r=C.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/r.width*N),y=Math.floor((e.clientY-r.top)/r.height*N),i=id(x,y);if(!ok(x,y)||cells[i].locked||moves>=limit)return;if(cells[i].type==='sleepy'&&cells[i].sleep){cells[i].sleep=false;cells[i].revealed=true;msg.textContent='😺 졸린 타일을 깨웠어';draw();return;}if(cells[i].type==='star'){cells[i].revealed=true;draw();}if(cells[i].type==='cloud'){cells[i].revealed=true;draw();}let cb=C.getBoundingClientRect(),sb=scene.getBoundingClientRect();paw.style.left=(cb.left-sb.left+(x+.5)/N*cb.width)+'px';paw.style.top=(cb.top-sb.top+(y+.5)/N*cb.height)+'px';paw.classList.add('on');setTimeout(()=>paw.classList.remove('on'),120);setTimeout(()=>{rotPress(i);moves++;power()},65)};
 function instantClear(){if(lock)return;cells.forEach(v=>{if(!v.locked)v.r=0});power()}
 function start(){homeBg.src=ART.stageBg;homeCat.src=IMG.cat_idle.src;sceneImg.src=ART.stageBg;renderDecorSlot();make();switchScreen('home')}
 
@@ -466,12 +520,14 @@ function haptic(ms){
   if(!SETTINGS.haptic)return;
   try{
     var H=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Haptics;
-    if(H){ms>=40?H.impact({style:'MEDIUM'}):H.impact({style:'LIGHT'});return}
+    if(H){var m0=Array.isArray(ms)?ms[0]:ms;m0>=40?H.impact({style:'MEDIUM'}):H.impact({style:'LIGHT'});return}
     if(navigator.vibrate)navigator.vibrate(ms);
   }catch(e){}
 }
+var USE_AUDIO_FILES=true; // audio/ 폴더의 실제 음원 사용 (없으면 합성음)
+var AUDIO_FILES={bgm:'audio/bgm.mp3',meow:['audio/meow1.ogg']};
 var Snd=(function(){
-  var ctx=null,master=null,sfxBus=null,bgmBus=null,verb=null,bgmTimer=null,nextChord=0,chordIdx=0,nextBell=0,windGain=null,windSrc=null;
+  var bgmBuf=null,meowBufs=[],sampleBgm=null,nextMeow=0,ctx=null,master=null,sfxBus=null,bgmBus=null,verb=null,bgmTimer=null,nextChord=0,chordIdx=0,nextBell=0,windGain=null,windSrc=null;
   // 밤 시간용: 낮은 음, 부드러운 시작, 긴 잔향. A마이너 계열 자장가 코드 진행
   var CHORDS=[[174.61,220,261.63,329.63],[130.81,196,246.94,329.63],[110,164.81,196,261.63],[98,146.83,164.81,246.94]];
   var BELLS=[440,523.25,587.33,659.25,784,880];
@@ -491,7 +547,13 @@ var Snd=(function(){
       sfxBus=ctx.createGain();sfxBus.gain.value=.8;sfxBus.connect(master);sfxBus.connect(verb);
       bgmBus=ctx.createGain();bgmBus.gain.value=.5;bgmBus.connect(master);bgmBus.connect(verb);
     }catch(e){ctx=null}
+    if(ctx&&USE_AUDIO_FILES)loadFiles();
     return ctx;
+  }
+  function loadFiles(){
+    function get(u,cb){fetch(u).then(function(r){if(!r.ok)throw 0;return r.arrayBuffer()}).then(function(ab){ctx.decodeAudioData(ab,cb,function(){})}).catch(function(){})}
+    get(AUDIO_FILES.bgm,function(b){bgmBuf=b;applyBgm()});
+    AUDIO_FILES.meow.forEach(function(u){get(u,function(b){meowBufs.push(b)})});
   }
   function unlock(){var c=init();if(c&&c.state==='suspended')c.resume();applyBgm()}
   function env(g,t0,a,hold,rel,v){g.gain.setValueAtTime(0.0001,t0);g.gain.linearRampToValueAtTime(v,t0+a);g.gain.setValueAtTime(v,t0+a+hold);g.gain.exponentialRampToValueAtTime(.0001,t0+a+hold+rel)}
@@ -504,11 +566,35 @@ var Snd=(function(){
     var o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.setValueAtTime(420,t0);o.frequency.exponentialRampToValueAtTime(240,t0+dur);
     env(g,t0,.006,0,dur,v);o.connect(g);g.connect(sfxBus);o.start(t0);o.stop(t0+dur+.05);
   }
+  function meow(t0,v,kind){
+    if(meowBufs.length){var s0=ctx.createBufferSource();s0.buffer=meowBufs[Math.random()*meowBufs.length|0];s0.playbackRate.value=.92+Math.random()*.2;var g0=ctx.createGain();g0.gain.value=Math.min(1,v*5);s0.connect(g0);g0.connect(master);g0.connect(verb);s0.start(t0);return}
+    // 합성 고양이 울음: 톱니파 + 모음(포먼트) 필터 + 음높이 곡선
+    var dur=kind==='short'?.34:.7, f0=kind==='short'?620:520, pk=kind==='short'?900:820;
+    var o=ctx.createOscillator(),g=ctx.createGain(),f1=ctx.createBiquadFilter(),f2=ctx.createBiquadFilter(),mix=ctx.createGain();
+    o.type='sawtooth';o.frequency.setValueAtTime(f0,t0);o.frequency.linearRampToValueAtTime(pk,t0+dur*.35);o.frequency.linearRampToValueAtTime(f0*.7,t0+dur);
+    var lfo=ctx.createOscillator(),lg=ctx.createGain();lfo.frequency.value=6;lg.gain.value=9;lfo.connect(lg);lg.connect(o.frequency);lfo.start(t0);lfo.stop(t0+dur+.1);
+    f1.type='bandpass';f1.Q.value=6;f1.frequency.setValueAtTime(700,t0);f1.frequency.linearRampToValueAtTime(1100,t0+dur*.4);f1.frequency.linearRampToValueAtTime(600,t0+dur);
+    f2.type='bandpass';f2.Q.value=8;f2.frequency.setValueAtTime(1800,t0);f2.frequency.linearRampToValueAtTime(2600,t0+dur*.4);f2.frequency.linearRampToValueAtTime(1500,t0+dur);
+    o.connect(f1);o.connect(f2);f1.connect(mix);f2.connect(mix);mix.gain.value=1.4;mix.connect(g);
+    env(g,t0,.07,dur*.45,dur*.45,v);g.connect(bgmBus);g.connect(sfxBus);o.start(t0);o.stop(t0+dur+.1);
+  }
+  function purr(){
+    var t=ctx.currentTime,len=Math.floor(ctx.sampleRate*1.6),b=ctx.createBuffer(1,len,ctx.sampleRate),d=b.getChannelData(0),last=0;
+    for(var i=0;i<len;i++){last=(last+.04*(Math.random()*2-1))/1.04;d[i]=last*7}
+    var s=ctx.createBufferSource();s.buffer=b;
+    var f=ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=240;
+    var m=ctx.createGain();m.gain.value=.5;
+    var l=ctx.createOscillator(),lg=ctx.createGain();l.frequency.value=23;lg.gain.value=.5;l.connect(lg);lg.connect(m.gain);
+    var e=ctx.createGain();env(e,t,.25,.7,.6,SETTINGS.night?.5:.8);
+    s.connect(f);f.connect(m);m.connect(e);e.connect(master);s.start(t);l.start(t);s.stop(t+1.7);l.stop(t+1.7);
+  }
   var S={
+    purr:purr,
+    meow:function(){meow(ctx.currentTime,.09,'short')},
     tap:function(){soft(ctx.currentTime,.11,.2)},
     star:function(){var t=ctx.currentTime;bell(659.25,t,.12);bell(987.77,t+.12,.1)},
     clear:function(){var t=ctx.currentTime,n=[261.63,329.63,392,493.88,659.25];n.forEach(function(f,i){bell(f,t+i*.22,.12,null,3)})},
-    shutter:function(){var t=ctx.currentTime;soft(t,.05,.16);soft(t+.07,.09,.12);bell(523.25,t+.14,.08)},
+    shutter:function(){var t=ctx.currentTime;soft(t,.05,.16);soft(t+.07,.09,.12);bell(523.25,t+.14,.08);meow(t+.35,SETTINGS.night?.07:.1,'short')},
     lock:function(){bell(587.33,ctx.currentTime,.08,null,.9)},
     miss:function(){soft(ctx.currentTime,.15,.08)},
     ui:function(){soft(ctx.currentTime,.07,.1)},
@@ -533,12 +619,15 @@ var Snd=(function(){
   function bgmTick(){
     if(!ctx||ctx.state!=='running'||document.hidden)return;
     var now=ctx.currentTime;
-    if(nextChord<now+1.5){
+    var useS=!!bgmBuf;
+    if(!useS&&nextChord<now+1.5){
       var t=Math.max(nextChord,now+.05),ch=CHORDS[chordIdx%CHORDS.length];
       ch.forEach(function(f,i){tone(f,t,3.2,1.8,3.6,i===0?.07:.05,bgmBus,(i-1.5)*3)});
       chordIdx++;nextChord=t+8;nextBell=Math.max(nextBell,t+1.5);
     }
-    if(nextBell<now+1.5){
+    if(!nextMeow)nextMeow=now+9;
+    if(now>nextMeow){meow(now+.05,SETTINGS.night?.05:.08,Math.random()<.6?'long':'short');nextMeow=now+22+Math.random()*28}
+    if(!useS&&nextBell<now+1.5){
       var tb=Math.max(nextBell,now+.05);
       if(Math.random()<.75)bell(BELLS[Math.random()*BELLS.length|0],tb,SETTINGS.night?.05:.07,bgmBus,3.2);
       nextBell=tb+2.6+Math.random()*3.2;
@@ -547,10 +636,12 @@ var Snd=(function(){
   function applyBgm(){
     if(bgmTimer){clearInterval(bgmTimer);bgmTimer=null}
     if(master)master.gain.value=vol();
-    if(SETTINGS.bgm&&ctx){nextChord=Math.max(nextChord,ctx.currentTime);startWind();bgmTimer=setInterval(bgmTick,400);bgmTick()}
+    if(sampleBgm){try{sampleBgm.stop()}catch(e){}sampleBgm=null}
+    if(SETTINGS.bgm&&ctx&&bgmBuf){var s=ctx.createBufferSource();s.buffer=bgmBuf;s.loop=true;var g=ctx.createGain();g.gain.value=SETTINGS.night?.3:.5;s.connect(g);g.connect(master);g.connect(verb);s.start();sampleBgm=s;stopWind();bgmTimer=setInterval(bgmTick,400)}
+    else if(SETTINGS.bgm&&ctx){nextChord=Math.max(nextChord,ctx.currentTime);startWind();bgmTimer=setInterval(bgmTick,400);bgmTick()}
     else stopWind();
   }
-  return {init:init,unlock:unlock,play:play,applyBgm:applyBgm,state:function(){return ctx?ctx.state:'none'}};
+  return {init:init,unlock:unlock,play:play,applyBgm:applyBgm,state:function(){return ctx?ctx.state:'none'},files:function(){return [!!bgmBuf,meowBufs.length,!!sampleBgm]}};
 })();
 ['pointerdown','touchstart','keydown'].forEach(function(ev){document.addEventListener(ev,function(){Snd.unlock()},{passive:true})});
 document.addEventListener('visibilitychange',function(){if(!document.hidden)Snd.unlock()});
@@ -631,11 +722,12 @@ function tutRefresh(){
     }else{
       handHint.style.display='none';
       var seen=tutSeen(),has={};
-      cells.forEach(function(v){if(v.locked)has.lock=1;if(v.type==='star')has.star=1;if(v.type==='sleepy')has.sleepy=1;if(v.type==='cloud')has.cloud=1});
+      cells.forEach(function(v){if(v.locked)has.lock=1;if(v.type==='star')has.star=1;if(v.type==='sleepy')has.sleepy=1;if(v.type==='cloud')has.cloud=1;if(v.type==='mirror')has.mirror=1});
       var info={lock:'🔒 <b>고정 타일</b>은 돌릴 수 없어요. 길을 계획할 때 기준점이 돼요.',
                 star:'⭐ <b>별 타일</b>에 빛이 닿으면 별을 모아요. 한 번 눌러 모양을 확인해보세요.',
                 sleepy:'😴 <b>졸린 타일</b>은 한 번 눌러 깨워야 돌릴 수 있어요.',
-                cloud:'☁️ <b>구름 타일</b>은 한 번 눌러야 안의 길이 보여요.'};
+                cloud:'☁️ <b>구름 타일</b>은 한 번 눌러야 안의 길이 보여요.',
+                mirror:'🔁 <b>거울 타일</b>(점선 테두리)은 누르면 <b>옆 타일 4개도 같이</b> 돌아가요. 힌트로는 못 맞춰요.'};
       for(var k in info){if(has[k]&&!seen[k]&&moves<2){text=info[k];tutMark(k);tutRefresh._cur=k;break}}
       if(!text&&tutRefresh._cur&&moves<2&&coachCard.style.display==='block')return; // 안내가 떠 있는 동안 유지
       if(moves>=2)tutRefresh._cur=null;
@@ -651,5 +743,251 @@ function tutRefresh(){
 })();
 window.addEventListener('resize',function(){setTimeout(tutRefresh,100)});
 renderSettings();setTimeout(tutRefresh,300);
+/* ===================== 고양이 쓰다듬기 ===================== */
+var petCombo=0,petLast=0,petBusy=0;
+function petCat(e){
+  if(aiming)return;
+  var now=Date.now();petCombo=(now-petLast<2500)?petCombo+1:1;petLast=now;
+  try{localStorage.pawPets=(Number(localStorage.pawPets||0)+1)}catch(x){}
+  homeCat.classList.remove('pet');void homeCat.offsetWidth;homeCat.classList.add('pet');
+  clearTimeout(petBusy);petBusy=setTimeout(function(){homeCat.classList.remove('pet')},480);
+  var sc=document.querySelector('#homeScreen .homeScene').getBoundingClientRect(),cr=homeCat.getBoundingClientRect();
+  var lx=((cr.left+cr.width*(.35+Math.random()*.3)-sc.left)/sc.width*100),by=((sc.bottom-cr.top-cr.height*.15)/sc.height*100);
+  var n=petCombo>=5?3:1;
+  for(var i=0;i<n;i++){var fx=document.createElement('span');fx.className='playFx'+(petCombo>=5?' big':'');fx.textContent=['💗','💕','✨'][Math.random()*3|0];fx.style.left=(lx+(i-(n-1)/2)*7)+'%';fx.style.bottom=by+'%';decorSlot.appendChild(fx);(function(x){setTimeout(function(){x.remove()},1700)})(fx)}
+  if(!playing){if(IMG.cat_happy){currentPose='happy';homeCat.src=IMG.cat_happy.src}else if(currentPose!=='idle'&&currentPose!=='lookup'){currentPose='idle';homeCat.src=IMG.cat_idle.src}}
+  Snd.play('purr');haptic(petCombo>=5?[12,40,12,40,12]:10);
+  if(petCombo===5){photoToast.textContent='😻 고양이가 기분이 좋아서 가르랑거려요';setTimeout(function(){if(photoToast.textContent.indexOf('가르랑')>0)photoToast.textContent=''},2200)}
+  if(petCombo===8&&SETTINGS.sfx)Snd.play('meow');
+}
+homeCat.addEventListener('pointerdown',petCat);
+/* ===================== 새 고양이 포즈 자동 등록 (cats/manifest.json) ===================== */
+(function(){
+  fetch('cats/manifest.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null}).then(function(m){
+    if(!m||!m.poses)return;
+    Object.keys(m.poses).forEach(function(k){
+      var d=m.poses[k],img=new Image();
+      img.onload=function(){IMG['cat_'+k]=img;if(!POSE_POOL.some(function(p){return p.k===k}))POSE_POOL.push({k:k,w:d.w||6})};
+      img.src=d.file;
+    });
+  }).catch(function(){});
+})();
+
+
+/* ===================== 퍼즐 중 고양이 반응 ===================== */
+var nearShown=false,reactT=0,lastMoveAt=Date.now(),catNapping=false,lastLit=0;
+function catReact(pose,ms,hop){
+  if(lock)return;
+  setCat(pose);
+  if(hop){cat.classList.remove('hop');void cat.offsetWidth;cat.classList.add('hop');setTimeout(function(){cat.classList.remove('hop')},520)}
+  clearTimeout(reactT);reactT=setTimeout(function(){if(!lock)setCat('lookup')},ms);
+}
+function flashMsg(t,ms){
+  var prev='별빛 길을 이어줘';msg.textContent=t;
+  setTimeout(function(){if(msg.textContent===t)msg.textContent=prev},ms||1800);
+}
+(function(){
+  var _pw=power;
+  power=function(){
+    var s0=stars,l0=lastLit;
+    var r=_pw.apply(this,arguments);
+    var lit=0;for(var i=0;i<cells.length;i++)if(cells[i].on)lit++;
+    lastLit=lit;lastMoveAt=Date.now();
+    if(catNapping){catNapping=false;setCat('lookup')}
+    if(!lock&&moves>0){
+      var total=cells.length;
+      if(stars>s0){catReact('receive',900,true)}
+      else if(lit>=total-2&&lit<total&&!nearShown){nearShown=true;catReact('lookup',1200,true);flashMsg('✨ 거의 다 왔어요!');Snd.play('lock');haptic(12)}
+      else if(lit-l0>=3){catReact('paw',650,false)}
+    }
+    return r;
+  };
+  var _mk3=make;make=function(){nearShown=false;lastLit=0;lastMoveAt=Date.now();catNapping=false;return _mk3.apply(this,arguments)};
+  var _rt=retry;retry=function(){nearShown=false;lastLit=0;lastMoveAt=Date.now();catNapping=false;return _rt.apply(this,arguments)};
+  setInterval(function(){
+    if(!document.getElementById('puzzleScreen').classList.contains('active')||lock||catNapping)return;
+    if(Date.now()-lastMoveAt>30000){catNapping=true;if(IMG.cat_yawn){setCat('yawn');setTimeout(function(){if(catNapping&&!lock)setCat('sleep')},1900)}else setCat('sleep')}
+  },2000);
+})();
+
+/* 숨쉬기 속도를 포즈에 맞추기 */
+(function(){
+  function tag(el){
+    var s=el.getAttribute('src'),f='idle';
+    ['idle','lookup','paw','sleep','receive','happy','yawn','stretch'].forEach(function(k){if(IMG['cat_'+k]&&IMG['cat_'+k].src===el.src)f=k});
+    el.dataset.pose=f;
+  }
+  [homeCat,cat].forEach(function(el){new MutationObserver(function(){tag(el)}).observe(el,{attributes:true,attributeFilter:['src']});tag(el)});
+})();
+
+
+
+/* ===================== 타일 회전 애니메이션 ===================== */
+var animOn=false,animPending=false,ROT_MS=150;
+function rotAng(v){
+  if(v.lastR===undefined){v.lastR=v.r;return 0}
+  if(v.lastR!==v.r){v.lastR=v.r;v.at=performance.now()}
+  if(!v.at)return 0;
+  var t=(performance.now()-v.at)/ROT_MS;
+  if(t>=1){v.at=0;return 0}
+  animOn=true;var e=1-Math.pow(1-t,3);
+  return -(1-e)*Math.PI/2;
+}
+(function(){
+  var _draw=draw;
+  draw=function(){animOn=false;_draw.apply(this,arguments);
+    if(animOn&&!animPending){animPending=true;requestAnimationFrame(function(){animPending=false;draw()})}};
+})();
+
+/* ===================== 실패 화면 (부드럽게) ===================== */
+var failN=0,failKey=0;
+function failMsg(){
+  failN=(failKey===st)?failN+1:1;failKey=st;
+  Snd.play('fail');
+  if(failN>=2){
+    fmsg.textContent='두 번째 도전이었죠? 이번엔 고양이가 발을 +5 무료로 빌려줄게요 🐾 (별은 줄지 않아요)';
+    extBtn.textContent='🐾 +5 무료로 이어하기';
+  }else{
+    fmsg.textContent='아쉬워요, 고양이가 응원하고 있어요. 별은 줄지 않았어요 ✨ 같은 판을 다시 해도 되고, 별 5개로 이어갈 수도 있어요.';
+    extBtn.textContent='⭐ 5개로 +5 🐾 이어하기';
+  }
+}
+(function(){var _sc2=showClear;showClear=function(){failN=0;return _sc2.apply(this,arguments)}})();
+
+/* ===================== 고양이가 소품과 노는 장면 ===================== */
+var playing=false,nextPlayAt=0,playKey=null;
+var PLAY={
+  yarn:{anim:'p-roll',pose:'paw',dur:2600,fx:'💕',msg:'🧶 고양이가 실뭉치를 굴려요'},
+  fish:{anim:'p-hop',pose:'paw',dur:2600,fx:'✨',msg:'🐟 고양이가 물고기를 잡으려 해요'},
+  plant:{anim:'p-sway',pose:'lookup',dur:3200,fx:'🍃',msg:'🪴 고양이가 잎사귀 냄새를 맡아요'},
+  basket:{anim:'',pose:'sleep',dur:6500,fx:'💤',msg:'🧺 고양이가 바구니에서 낮잠을 자요',inside:true}
+};
+function catPlace(pct){homeCat.style.left=pct+'%'}
+function playWithDecor(){
+  if(playing||aiming)return;
+  if(!document.getElementById('homeScreen').classList.contains('active'))return;
+  var els=decorSlot.querySelectorAll('.decorItem');if(!els.length)return;
+  var idx=Math.random()*els.length|0,el=els[idx],key=equippedDecor[idx],cfg=PLAY[key];if(!cfg)return;
+  playing=true;playKey=key;stopHomePoseCycle();
+  var itemLeft=parseFloat(el.style.left)||60;
+  catPlace(cfg.inside?Math.min(itemLeft-12,50):Math.max(8,itemLeft-21));
+  setTimeout(function(){
+    currentPose=cfg.pose;homeCat.src=IMG['cat_'+cfg.pose].src;
+    if(cfg.anim){el.classList.add(cfg.anim)}
+    var fx=document.createElement('span');fx.className='playFx';fx.textContent=cfg.fx;fx.style.left=(itemLeft+2)+'%';fx.style.bottom='20%';decorSlot.appendChild(fx);setTimeout(function(){fx.remove()},1700);
+    if(!document.getElementById('photoToast').textContent)photoToast.textContent=cfg.msg;
+    if(SETTINGS.sfx&&Math.random()<.5)Snd.play('meow');
+  },1300);
+  setTimeout(function(){
+    if(cfg.anim)el.classList.remove(cfg.anim);
+    if(photoToast.textContent===cfg.msg)photoToast.textContent='';
+    catPlace(37);
+    setTimeout(function(){playing=false;playKey=null;if(document.getElementById('homeScreen').classList.contains('active'))startHomePoseCycle()},1300);
+  },1300+cfg.dur);
+}
+(function(){
+  var _chp=cycleHomePose;cycleHomePose=function(){if(playing)return;return _chp.apply(this,arguments)};
+  var _tp2=takePhoto;
+  takePhoto=function(){
+    var wasPlaying=playing,key=playKey;
+    var r=_tp2.apply(this,arguments);
+    if(wasPlaying&&key){
+      try{var ph=JSON.parse(localStorage.pawPhotos||'[]');if(ph[0]){ph[0].rare=true;ph[0].play=key;localStorage.pawPhotos=JSON.stringify(ph)}}catch(e){}
+      photoToast.textContent='✨ 소품을 가지고 노는 순간을 포착했어요!';setTimeout(function(){photoToast.textContent=''},1800);
+    }
+    return r;
+  };
+  setInterval(function(){
+    var now=Date.now();
+    if(!nextPlayAt)nextPlayAt=now+7000;
+    if(now>=nextPlayAt){nextPlayAt=now+16000+Math.random()*14000;playWithDecor()}
+  },2500);
+})();
+
+
+
+/* ===================== 거울 타일 표시 ===================== */
+function mirrorBadge(cx,cy,on){
+  X.save();var r=S/2-3;X.setLineDash([5,4]);X.lineWidth=2;X.strokeStyle=on?'#bff4ff':'#6fb5c9';X.strokeRect(cx-r,cy-r,2*r,2*r);X.setLineDash([]);
+  X.fillStyle=on?'#bff4ff':'#6fb5c9';X.font='bold '+Math.max(11,S*.26)+'px sans-serif';X.textAlign='center';X.textBaseline='middle';X.fillText('⟳',cx+S*.3,cy-S*.3);X.restore();
+}
+
+/* ===================== 호감도 ===================== */
+var AFF={levels:[0,20,60,120,200,300],rewards:[0,5,10,15,20,30],
+  texts:['','고양이가 이제 손길을 피하지 않아요.','창가 자리가 고양이의 단골석이 되었어요.','밤마다 가르랑거리며 기다리는 눈치예요.','별빛 길을 이어주는 당신을 가장 좋아해요.','이제 둘은 가족이에요.'],petDailyCap:30};
+function affVal(){return Number(localStorage.pawAff||0)}
+function affLevel(v){var l=0;for(var i=0;i<AFF.levels.length;i++)if(v>=AFF.levels[i])l=i;return l}
+function renderAff(){
+  var el=document.getElementById('affRow');if(!el)return;
+  var v=affVal(),l=affLevel(v),max=l>=AFF.levels.length-1;
+  var from=AFF.levels[l],to=max?from:AFF.levels[l+1],pct=max?100:Math.round((v-from)/(to-from)*100);
+  el.innerHTML='💗 호감도 <b>Lv.'+(l+1)+(max?' MAX':'')+'</b><span class=affBar><i style="width:'+pct+'%"></i></span>'+(max?'':'<span class=affNum>'+v+'/'+to+'</span>');
+}
+function affAdd(n){
+  var before=affLevel(affVal()),v=affVal()+n;try{localStorage.pawAff=v}catch(e){}
+  var after=affLevel(v),claimed=Number(localStorage.pawAffClaim||0);
+  for(var L=Math.max(before,claimed)+1;L<=after;L++){
+    moon+=AFF.rewards[L];try{localStorage.pawMoon=moon}catch(e){}moonWallet.textContent='🌙 '+moon;
+    photoToast.textContent='💗 호감도 Lv.'+(L+1)+'! '+AFF.texts[L]+' (+'+AFF.rewards[L]+'🌙)';
+    setTimeout(function(){if(photoToast.textContent.indexOf('호감도')===0)photoToast.textContent=''},4200);
+    Snd.play('buy');haptic([20,50,20]);
+    try{localStorage.pawAffClaim=L}catch(e){}
+  }
+  renderAff();
+}
+homeCat.addEventListener('pointerdown',function(){
+  if(aiming)return;
+  var t=new Date().toDateString(),d={};try{d=JSON.parse(localStorage.pawAffPet||'{}')}catch(e){}
+  if(d.date!==t)d={date:t,n:0};
+  if(d.n<AFF.petDailyCap){d.n++;try{localStorage.pawAffPet=JSON.stringify(d)}catch(e){}affAdd(1)}
+});
+(function(){
+  var _tp3=takePhoto;takePhoto=function(){var w=playing,cp=currentPose;var r=_tp3.apply(this,arguments);
+    if(cp==='yawn'||cp==='stretch'){try{var ph=JSON.parse(localStorage.pawPhotos||'[]');if(ph[0]){ph[0].rare=true;localStorage.pawPhotos=JSON.stringify(ph)}}catch(e){}photoToast.textContent=cp==='yawn'?'✨ 하품하는 순간을 포착했어요!':'✨ 기지개 켜는 순간을 포착했어요!';setTimeout(function(){photoToast.textContent=''},1800)}
+    affAdd(w?5:(cp==='yawn'||cp==='stretch')?5:3);return r};
+  var _pwd=playWithDecor;playWithDecor=function(){var was=playing;var r=_pwd.apply(this,arguments);if(!was&&playing)affAdd(1);return r};
+  var _om=openMemory;
+  openMemory=function(){
+    var r=_om.apply(this,arguments);
+    var v=affVal(),l=affLevel(v),html='<hr style="border:0;border-top:1px solid #ffffff22;margin:12px 0"><b>💗 고양이와의 거리</b> <span style="color:#8b90ad;font-size:12px">호감도 '+v+'</span>';
+    for(var i=1;i<AFF.texts.length;i++)html+=i<=l?'<div class=memEntry>💗 Lv.'+(i+1)+' — '+AFF.texts[i]+'</div>':'<div class="memEntry memLocked">🔒 호감도 Lv.'+(i+1)+'에서 열려요 ('+AFF.levels[i]+')</div>';
+    memoryBody.insertAdjacentHTML('beforeend',html);return r;
+  };
+})();
+
+/* ===================== 주간 특별한 밤 ===================== */
+var weeklyMode=false,weeklyPrevSt=1;
+var WEEKLY_ITEMS=['lantern','pumpkin','tree','cake','bunny','kite','snow','flower'];
+WEEKLY_ITEMS.forEach(function(k){PLAY[k]={anim:'p-sway',pose:'lookup',dur:3000,fx:'✨',msg:decorItems[k].emoji+' 고양이가 '+decorItems[k].name+'을(를) 구경해요'}});
+function weekKey(){var d=new Date(),day=(d.getDay()+6)%7,m=new Date(d.getFullYear(),d.getMonth(),d.getDate()-day);return m.getFullYear()+'-'+(m.getMonth()+1)+'-'+m.getDate()}
+function weekItemKey(){var d=new Date(),day=(d.getDay()+6)%7,m=new Date(d.getFullYear(),d.getMonth(),d.getDate()-day);return WEEKLY_ITEMS[Math.floor(m.getTime()/(7*864e5))%WEEKLY_ITEMS.length]}
+function weeklyDone(){return localStorage.pawWeekly===weekKey()}
+function renderWeekly(){
+  var el=document.getElementById('weeklyCard');if(!el)return;var k=weekItemKey(),it=decorItems[k];
+  el.innerHTML=weeklyDone()?'✅ 이번 주 <b>특별한 밤</b> 완료 — '+it.emoji+' '+it.name+' 획득! 다음 주 월요일에 새로운 밤이 열려요.'
+    :'🌟 이번 주 <b>특별한 밤</b> — 거울 타일이 나와요<br>클리어하면 한정 소품 '+it.emoji+' <b>'+it.name+'</b> + 🌙 10 <button class=weeklyBtn onclick="startWeekly()">도전하기</button>';
+}
+function startWeekly(){if(weeklyDone())return;weeklyMode=true;weeklyPrevSt=st;make();switchScreen('puzzle')}
+(function(){
+  var _cfg=cfg;cfg=function(){if(weeklyMode)return{target:55,size:5,slack:7,fixed:2,special:3,adj:0,forceMirror:2};return _cfg.apply(this,arguments)};
+  var _sc4=showClear;
+  showClear=function(g,n){
+    if(weeklyMode){
+      st=weeklyPrevSt;saveState();var k=weekItemKey(),it=decorItems[k];
+      try{localStorage.pawWeekly=weekKey()}catch(e){}
+      if(!ownedDecor.includes(k)){ownedDecor.push(k);localStorage.pawDecorOwned=JSON.stringify(ownedDecor);if(equippedDecor.length>=2)equippedDecor.shift();equippedDecor.push(k);localStorage.pawDecorEquipped=JSON.stringify(equippedDecor)}
+      moon+=10;localStorage.pawMoon=moon;moonWallet.textContent='🌙 '+moon;
+      var r=_sc4.call(this,g,'★');
+      document.querySelector('#clearScreen .clearTitle').textContent='SPECIAL NIGHT CLEAR!';
+      clearReward.innerHTML+='<span class=rewardItem>+10 🌙</span><span class=rewardItem>'+it.emoji+' '+it.name+'</span>';
+      weeklyMode=false;affAdd(5);return r;
+    }
+    affAdd(2);return _sc4.apply(this,arguments);
+  };
+  var _sw2=switchScreen;
+  switchScreen=function(n){if(n==='home')weeklyMode=false;var r=_sw2.apply(this,arguments);if(n==='home'){renderWeekly();renderAff()}return r};
+  var _dr=draw;draw=function(){_dr.apply(this,arguments);if(weeklyMode)stageNum.textContent='🌟'};
+})();
+renderWeekly();renderAff();
 
 </script><script>if('serviceWorker' in navigator&&location.protocol!=='file:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script></body></html>

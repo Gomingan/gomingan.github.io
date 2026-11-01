@@ -1,0 +1,17 @@
+{
+  "_설명": "새 포즈 그림(투명 이미지)을 cats/ 에 넣고 아래 poses 에 추가하세요. w 는 홈 화면에서 나올 확률 가중치.",
+  "poses": {
+    "happy": {
+      "file": "cats/happy.webp",
+      "w": 14
+    },
+    "yawn": {
+      "file": "cats/yawn.webp",
+      "w": 12
+    },
+    "stretch": {
+      "file": "cats/stretch.webp",
+      "w": 12
+    }
+  }
+}
