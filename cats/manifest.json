@@ -12,6 +12,22 @@
     "stretch": {
       "file": "cats/stretch.webp",
       "w": 12
+    },
+    "idle": {
+      "file": "cats/idle.webp",
+      "w": 0
+    },
+    "lookup": {
+      "file": "cats/lookup.webp",
+      "w": 0
+    },
+    "paw": {
+      "file": "cats/paw.webp",
+      "w": 0
+    },
+    "receive": {
+      "file": "cats/receive.webp",
+      "w": 0
     }
   }
 }

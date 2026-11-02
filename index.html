@@ -767,7 +767,7 @@ homeCat.addEventListener('pointerdown',petCat);
     if(!m||!m.poses)return;
     Object.keys(m.poses).forEach(function(k){
       var d=m.poses[k],img=new Image();
-      img.onload=function(){IMG['cat_'+k]=img;if(!POSE_POOL.some(function(p){return p.k===k}))POSE_POOL.push({k:k,w:d.w||6})};
+      img.onload=function(){IMG['cat_'+k]=img;if(!POSE_POOL.some(function(p){return p.k===k}))POSE_POOL.push({k:k,w:d.w||6});if(currentPose===k)homeCat.src=img.src;try{if(document.getElementById('puzzleScreen').classList.contains('active')&&!lock&&k==='lookup')setCat('lookup')}catch(e){}};
       img.src=d.file;
     });
   }).catch(function(){});
