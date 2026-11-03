@@ -539,6 +539,7 @@ var Snd=(function(){
     var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;
     try{
       ctx=new AC();
+      ctx.onstatechange=function(){if(ctx.state==='running')applyBgm()};
       master=ctx.createGain();master.gain.value=vol();
       var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2600;lp.Q.value=.3;
       master.connect(lp);lp.connect(ctx.destination);
@@ -635,9 +636,13 @@ var Snd=(function(){
       nextBell=tb+2.6+Math.random()*3.2;
     }
   }
+  var curKey='';
   function applyBgm(){
-    if(bgmTimer){clearInterval(bgmTimer);bgmTimer=null}
     if(master)master.gain.value=vol();
+    var key=[SETTINGS.bgm,SETTINGS.night,!!bgmBuf,!!ctx].join();
+    if(key===curKey&&(bgmTimer||!SETTINGS.bgm))return;
+    curKey=key;
+    if(bgmTimer){clearInterval(bgmTimer);bgmTimer=null}
     if(sampleBgm){try{sampleBgm.stop()}catch(e){}sampleBgm=null}
     if(SETTINGS.bgm&&ctx&&bgmBuf){var s=ctx.createBufferSource();s.buffer=bgmBuf;s.loop=true;var g=ctx.createGain();g.gain.value=SETTINGS.night?.3:.5;s.connect(g);g.connect(master);g.connect(verb);s.start();sampleBgm=s;stopWind();bgmTimer=setInterval(bgmTick,400)}
     else if(SETTINGS.bgm&&ctx){nextChord=Math.max(nextChord,ctx.currentTime);startWind();bgmTimer=setInterval(bgmTick,400);bgmTick()}
@@ -647,6 +652,7 @@ var Snd=(function(){
 })();
 ['pointerdown','touchstart','keydown'].forEach(function(ev){document.addEventListener(ev,function(){Snd.unlock()},{passive:true})});
 document.addEventListener('visibilitychange',function(){if(!document.hidden)Snd.unlock()});
+try{Snd.init();var _c=Snd.state();if(_c==='running')Snd.applyBgm()}catch(e){}
 
 /* 설정 창 */
 function renderSettings(){
