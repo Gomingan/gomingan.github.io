@@ -55,6 +55,10 @@
     "basket": {
       "file": "cats/basket.webp",
       "w": 0
+    },
+    "play_plant": {
+      "file": "cats/play_plant.webp",
+      "w": 0
     }
   }
 }

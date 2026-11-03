@@ -104,6 +104,8 @@ body{min-height:100vh;min-height:100dvh}
 
 #homeCat{pointer-events:auto;cursor:pointer;transform-origin:50% 100%;-webkit-tap-highlight-color:transparent}
 #homeCat.pet{animation:petSq .45s ease-out}
+#homeCat[data-pose=play_plant]{height:24%!important}
+#homeCat[data-pose=play_yarn],#homeCat[data-pose=play_fish]{height:30%!important}
 @keyframes petSq{0%{transform:scale(1)}30%{transform:scale(1.05,.92)}65%{transform:scale(.98,1.03)}100%{transform:scale(1)}}
 .playFx.big{font-size:28px}
 
@@ -860,9 +862,9 @@ function failMsg(){
 /* ===================== 고양이가 소품과 노는 장면 ===================== */
 var playing=false,nextPlayAt=0,playKey=null;
 var PLAY={
-  yarn:{anim:'',pose:'play_yarn',alt:'paw',hide:1,ax:.9,dur:3200,fx:'💕',msg:'🧶 고양이가 실뭉치를 굴려요'},
-  fish:{anim:'',pose:'play_fish',alt:'paw',hide:1,ax:.88,dur:3200,fx:'✨',msg:'🐟 고양이가 물고기를 잡으려 해요'},
-  plant:{anim:'p-sway',pose:'lookup',dur:3200,fx:'🍃',msg:'🪴 고양이가 잎사귀 냄새를 맡아요'},
+  yarn:{anim:'',pose:'play_yarn',big:30,alt:'paw',hide:1,ax:.9,dur:3200,fx:'💕',msg:'🧶 고양이가 실뭉치를 굴려요'},
+  fish:{anim:'',pose:'play_fish',big:30,alt:'paw',hide:1,ax:.88,dur:3200,fx:'✨',msg:'🐟 고양이가 물고기를 잡으려 해요'},
+  plant:{anim:'',pose:'play_plant',alt:'lookup',hide:1,big:24,ax:.9,dur:3800,fx:'🍃',msg:'🪴 고양이가 잎사귀 냄새를 맡아요'},
   basket:{anim:'',pose:'basket',alt:'sleep',hide:1,ax:.5,dur:6500,fx:'💤',msg:'🧺 고양이가 바구니에서 낮잠을 자요',inside:true}
 };
 function catPlace(pct){homeCat.style.left=pct+'%'}
@@ -874,7 +876,7 @@ function playWithDecor(){
   playing=true;playKey=key;stopHomePoseCycle();
   var itemLeft=parseFloat(el.style.left)||60;
   var pk=IMG['cat_'+cfg.pose]?cfg.pose:cfg.alt,own=(pk===cfg.pose&&cfg.hide);
-  var sc=homeCat.parentElement.getBoundingClientRect(),cw=homeCat.getBoundingClientRect().width/sc.width*100;
+  var sc=homeCat.parentElement.getBoundingClientRect(),pim=IMG['cat_'+pk],cw=pim.naturalWidth/pim.naturalHeight*(own&&cfg.big?cfg.big:20)*sc.height/sc.width;
   var elBottom=el.style.bottom;
   catPlace(own?Math.max(0,Math.min(100-cw,itemLeft+3-cfg.ax*cw)):(cfg.inside?Math.min(itemLeft-12,50):Math.max(8,itemLeft-21)));
   setTimeout(function(){
