@@ -762,12 +762,13 @@ function petCat(e){
 }
 homeCat.addEventListener('pointerdown',petCat);
 /* ===================== 새 고양이 포즈 자동 등록 (cats/manifest.json) ===================== */
+var ANIM={};
 (function(){
   fetch('cats/manifest.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null}).then(function(m){
     if(!m||!m.poses)return;
     Object.keys(m.poses).forEach(function(k){
       var d=m.poses[k],img=new Image();
-      img.onload=function(){IMG['cat_'+k]=img;if(!POSE_POOL.some(function(p){return p.k===k}))POSE_POOL.push({k:k,w:d.w||6});if(currentPose===k)homeCat.src=img.src;try{if(document.getElementById('puzzleScreen').classList.contains('active')&&!lock&&k==='lookup')setCat('lookup')}catch(e){}};
+      img.onload=function(){IMG['cat_'+k]=img;if(!POSE_POOL.some(function(p){return p.k===k}))POSE_POOL.push({k:k,w:d.w||6});if(currentPose===k)homeCat.src=img.src;if(d.anim){var an=new Image();an.onload=function(){ANIM[k]=an;if(currentPose===k)homeCat.src=img.src;try{if(IMG['cat_'+k]&&cat.src===IMG['cat_'+k].src)cat.src=img.src}catch(e){}};an.src=d.anim}try{if(document.getElementById('puzzleScreen').classList.contains('active')&&!lock&&k==='lookup')setCat('lookup')}catch(e){}};
       img.src=d.file;
     });
   }).catch(function(){});
@@ -812,9 +813,11 @@ function flashMsg(t,ms){
 
 /* 숨쉬기 속도를 포즈에 맞추기 */
 (function(){
+  function swapAnim(el){for(var k in ANIM){if(IMG['cat_'+k]&&el.src===IMG['cat_'+k].src&&el.src!==ANIM[k].src){el.src=ANIM[k].src;return true}}return false}
   function tag(el){
-    var s=el.getAttribute('src'),f='idle';
-    ['idle','lookup','paw','sleep','receive','happy','yawn','stretch'].forEach(function(k){if(IMG['cat_'+k]&&IMG['cat_'+k].src===el.src)f=k});
+    if(swapAnim(el))return;
+    var f='idle';
+    ['idle','lookup','paw','sleep','receive','happy','yawn','stretch'].forEach(function(k){if((IMG['cat_'+k]&&IMG['cat_'+k].src===el.src)||(ANIM[k]&&ANIM[k].src===el.src))f=k});
     el.dataset.pose=f;
   }
   [homeCat,cat].forEach(function(el){new MutationObserver(function(){tag(el)}).observe(el,{attributes:true,attributeFilter:['src']});tag(el)});
@@ -857,10 +860,10 @@ function failMsg(){
 /* ===================== 고양이가 소품과 노는 장면 ===================== */
 var playing=false,nextPlayAt=0,playKey=null;
 var PLAY={
-  yarn:{anim:'p-roll',pose:'paw',dur:2600,fx:'💕',msg:'🧶 고양이가 실뭉치를 굴려요'},
-  fish:{anim:'p-hop',pose:'paw',dur:2600,fx:'✨',msg:'🐟 고양이가 물고기를 잡으려 해요'},
+  yarn:{anim:'',pose:'play_yarn',alt:'paw',hide:1,ax:.9,dur:3200,fx:'💕',msg:'🧶 고양이가 실뭉치를 굴려요'},
+  fish:{anim:'',pose:'play_fish',alt:'paw',hide:1,ax:.88,dur:3200,fx:'✨',msg:'🐟 고양이가 물고기를 잡으려 해요'},
   plant:{anim:'p-sway',pose:'lookup',dur:3200,fx:'🍃',msg:'🪴 고양이가 잎사귀 냄새를 맡아요'},
-  basket:{anim:'',pose:'sleep',dur:6500,fx:'💤',msg:'🧺 고양이가 바구니에서 낮잠을 자요',inside:true}
+  basket:{anim:'',pose:'basket',alt:'sleep',hide:1,ax:.5,dur:6500,fx:'💤',msg:'🧺 고양이가 바구니에서 낮잠을 자요',inside:true}
 };
 function catPlace(pct){homeCat.style.left=pct+'%'}
 function playWithDecor(){
@@ -870,9 +873,13 @@ function playWithDecor(){
   var idx=Math.random()*els.length|0,el=els[idx],key=equippedDecor[idx],cfg=PLAY[key];if(!cfg)return;
   playing=true;playKey=key;stopHomePoseCycle();
   var itemLeft=parseFloat(el.style.left)||60;
-  catPlace(cfg.inside?Math.min(itemLeft-12,50):Math.max(8,itemLeft-21));
+  var pk=IMG['cat_'+cfg.pose]?cfg.pose:cfg.alt,own=(pk===cfg.pose&&cfg.hide);
+  var sc=homeCat.parentElement.getBoundingClientRect(),cw=homeCat.getBoundingClientRect().width/sc.width*100;
+  var elBottom=el.style.bottom;
+  catPlace(own?Math.max(0,Math.min(100-cw,itemLeft+3-cfg.ax*cw)):(cfg.inside?Math.min(itemLeft-12,50):Math.max(8,itemLeft-21)));
   setTimeout(function(){
-    currentPose=cfg.pose;homeCat.src=IMG['cat_'+cfg.pose].src;
+    currentPose=pk;homeCat.src=IMG['cat_'+pk].src;
+    if(own){el.style.visibility='hidden';if(cfg.inside)homeCat.style.bottom=elBottom}
     if(cfg.anim){el.classList.add(cfg.anim)}
     var fx=document.createElement('span');fx.className='playFx';fx.textContent=cfg.fx;fx.style.left=(itemLeft+2)+'%';fx.style.bottom='20%';decorSlot.appendChild(fx);setTimeout(function(){fx.remove()},1700);
     if(!document.getElementById('photoToast').textContent)photoToast.textContent=cfg.msg;
@@ -880,6 +887,7 @@ function playWithDecor(){
   },1300);
   setTimeout(function(){
     if(cfg.anim)el.classList.remove(cfg.anim);
+    el.style.visibility='';homeCat.style.bottom='13%';
     if(photoToast.textContent===cfg.msg)photoToast.textContent='';
     catPlace(37);
     setTimeout(function(){playing=false;playKey=null;if(document.getElementById('homeScreen').classList.contains('active'))startHomePoseCycle()},1300);

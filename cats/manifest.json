@@ -3,30 +3,57 @@
   "poses": {
     "happy": {
       "file": "cats/happy.webp",
-      "w": 14
+      "w": 14,
+      "anim": "cats/happy_anim.webp"
     },
     "yawn": {
       "file": "cats/yawn.webp",
-      "w": 12
+      "w": 12,
+      "anim": "cats/yawn_anim.webp"
     },
     "stretch": {
       "file": "cats/stretch.webp",
-      "w": 12
+      "w": 12,
+      "anim": "cats/stretch_anim.webp"
     },
     "idle": {
       "file": "cats/idle.webp",
-      "w": 0
+      "w": 0,
+      "anim": "cats/idle_anim.webp"
     },
     "lookup": {
       "file": "cats/lookup.webp",
-      "w": 0
+      "w": 0,
+      "anim": "cats/lookup_anim.webp"
     },
     "paw": {
       "file": "cats/paw.webp",
-      "w": 0
+      "w": 0,
+      "anim": "cats/paw_anim.webp"
     },
     "receive": {
       "file": "cats/receive.webp",
+      "w": 0,
+      "anim": "cats/receive_anim.webp"
+    },
+    "sleep": {
+      "file": "cats/sleep.webp",
+      "w": 0
+    },
+    "smile": {
+      "file": "cats/smile.webp",
+      "w": 10
+    },
+    "play_yarn": {
+      "file": "cats/play_yarn.webp",
+      "w": 0
+    },
+    "play_fish": {
+      "file": "cats/play_fish.webp",
+      "w": 0
+    },
+    "basket": {
+      "file": "cats/basket.webp",
       "w": 0
     }
   }
