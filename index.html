@@ -93,9 +93,9 @@ body{min-height:100vh;min-height:100dvh}
 @keyframes camPulse{0%{box-shadow:0 0 0 0 #ffd45cbb}70%{box-shadow:0 0 0 14px #ffd45c00}100%{box-shadow:0 0 0 0 #ffd45c00}}
 
 #homeCat{transition:left 1.2s ease-in-out}
-.decorItem.wiggle.p-roll{animation:dRoll 1.8s ease-in-out}
-.decorItem.wiggle.p-hop{animation:dHop .55s ease-in-out 4}
-.decorItem.wiggle.p-sway{animation:dSway 1s ease-in-out 3}
+.decorItem.p-roll{animation:dRoll 1.8s ease-in-out}
+.decorItem.p-hop{animation:dHop .55s ease-in-out 4}
+.decorItem.p-sway{animation:dSway 1s ease-in-out 3}
 @keyframes dRoll{0%{transform:translateX(0) rotate(0)}35%{transform:translateX(-46px) rotate(-420deg)}70%{transform:translateX(-10px) rotate(-90deg)}100%{transform:translateX(0) rotate(0)}}
 @keyframes dHop{0%,100%{transform:translateY(0) rotate(-10deg)}50%{transform:translateY(-22px) rotate(14deg)}}
 @keyframes dSway{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(14deg) translateY(-4px)}}
@@ -129,6 +129,12 @@ body{min-height:100vh;min-height:100dvh}
 @keyframes roomHop{0%,100%{translate:0 0}35%{translate:0 -14px}}
 @keyframes walkBob{0%,100%{translate:0 0}50%{translate:0 -6px}}
 .shopBtns{display:flex;gap:4px;flex-shrink:0}.shopBtns button{padding:7px 9px;font-size:12px;white-space:nowrap}.shopBtns button.on{background:#6c5ce7;color:#fff}
+.say{position:absolute;z-index:30;transform:translate(-50%,0) scale(.9);max-width:62%;background:#fff;color:#2b2540;font-size:13px;font-weight:600;padding:7px 11px;border-radius:14px;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;box-shadow:0 4px 12px #0005;text-align:center;line-height:1.3}
+.say::after{content:'';position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}
+.say.on{opacity:1;transform:translate(-50%,0) scale(1)}
+.sayLine{text-align:center;font-size:13px;opacity:.85;margin:2px 0 6px;font-style:italic}
+.catInfo{display:flex;flex-direction:column;line-height:1.25}.catInfo small{font-size:11px;color:#ffd98a;font-weight:600}.catInfo em{font-size:11px;opacity:.65;font-style:normal;max-width:150px}
+#homeCat.walking{animation:walkBob .42s ease-in-out infinite}
 </style></head>
 <body><div id=a>
 <div class=top id=topbar><b>🐾 PAWLIGHT</b><span id=wallet>⭐ 0</span><span id=moonWallet>🌙 0</span><span class=topBtns><button id=shopBtn>🛍️</button><button id=settingsBtn onclick="openSettings()">⚙️</button><button id=dbgBtn style="display:none">🐞</button></span></div>
@@ -256,10 +262,10 @@ function completeDailyIfNeeded(){
 
 // ===== 방 소품(달빛으로 구매, 고양이 옆에서 흔들리는 연출) =====
 const decorItems = {
-  yarn:{name:'실뭉치', emoji:'🧶', cost:0},
-  fish:{name:'물고기 장난감', emoji:'🐟', cost:0},
-  plant:{name:'화분', emoji:'🪴', cost:0},
-  basket:{name:'바구니', emoji:'🧺', cost:0},
+  yarn:{name:'실뭉치', emoji:'🧶', cost:20},
+  fish:{name:'물고기 장난감', emoji:'🐟', cost:30},
+  plant:{name:'화분', emoji:'🪴', cost:15},
+  basket:{name:'바구니', emoji:'🧺', cost:25},
   lantern:{name:'작은 등불', emoji:'🏮', cost:0, weekly:true},
   pumpkin:{name:'호박', emoji:'🎃', cost:0, weekly:true},
   tree:{name:'작은 트리', emoji:'🎄', cost:0, weekly:true},
@@ -438,42 +444,42 @@ const themeData = {
 
   theme_aurora:{
     name:'오로라 민트',
-    cost:0,
+    cost:1,
     glow:'#7fe7c4',
     warm:'#bdf5e6'
   },
 
   theme_sunset:{
     name:'노을 코랄',
-    cost:0,
+    cost:1,
     glow:'#ff8a65',
     warm:'#ffc4ad'
   },
 
   theme_moonlight:{
     name:'달빛 블루',
-    cost:0,
+    cost:2,
     glow:'#6fb5ff',
     warm:'#b8ddff'
   },
 
   theme_lavender:{
     name:'라벤더 드림',
-    cost:0,
+    cost:2,
     glow:'#b78cff',
     warm:'#dcc8ff'
   },
 
   theme_sakura:{
     name:'벚꽃 핑크',
-    cost:0,
+    cost:3,
     glow:'#ff89c5',
     warm:'#ffd2e9'
   },
 
   theme_starlight:{
     name:'은하수',
-    cost:0,
+    cost:5,
     glow:'#ffffff',
     warm:'#d6f4ff'
   }
@@ -486,7 +492,7 @@ function renderShop(){
   if(shopTab==='theme'){
     let h='';for(const k in themeData){let t=themeData[k],own=owned.includes(k),eq=curTheme===k;h+=`<div class=shopRow><span>${t.name}</span><button onclick="buy('${k}')">${eq?'적용중':own?'적용':t.cost+'⭐'}</button></div>`}shopList.innerHTML=h
   } else {
-    let h='';for(const k in decorItems){let d=decorItems[k],own=ownedDecor.includes(k),eq=equippedDecor.includes(k);if(d.weekly&&!own)continue;h+=`<div class=shopRow><span>${d.emoji} ${d.name}</span><button onclick="buyDecor('${k}')">${own?(eq?'놓는 중':'놓기'):d.cost+'🌙'}</button></div>`}shopList.innerHTML=h
+    let h='';for(const k in decorItems){let d=decorItems[k],own=ownedDecor.includes(k),eq=equippedDecor.includes(k);if(d.weekly&&!own&&!window.TEST_FREE)continue;h+=`<div class=shopRow><span>${d.emoji} ${d.name}</span><button onclick="buyDecor('${k}')">${own?(eq?'놓는 중':'놓기'):d.cost+'🌙'}</button></div>`}shopList.innerHTML=h
   }
 }
 function buy(k){let data=themeData[k];
@@ -575,7 +581,7 @@ var Snd=(function(){
     env(g,t0,.006,0,dur,v);o.connect(g);g.connect(sfxBus);o.start(t0);o.stop(t0+dur+.05);
   }
   function meow(t0,v,kind){
-    if(meowBufs.length){var s0=ctx.createBufferSource();s0.buffer=meowBufs[Math.random()*meowBufs.length|0];s0.playbackRate.value=.92+Math.random()*.2;var g0=ctx.createGain();g0.gain.value=Math.min(1,v*5);s0.connect(g0);g0.connect(master);g0.connect(verb);s0.start(t0);return}
+    if(meowBufs.length){var s0=ctx.createBufferSource();s0.buffer=meowBufs[Math.random()*meowBufs.length|0];s0.playbackRate.value=(.92+Math.random()*.2)*(window.CAT_PITCH||1);var g0=ctx.createGain();g0.gain.value=Math.min(1,v*5);s0.connect(g0);g0.connect(master);g0.connect(verb);s0.start(t0);return}
     // 합성 고양이 울음: 톱니파 + 모음(포먼트) 필터 + 음높이 곡선
     var dur=kind==='short'?.34:.7, f0=kind==='short'?620:520, pk=kind==='short'?900:820;
     var o=ctx.createOscillator(),g=ctx.createGain(),f1=ctx.createBiquadFilter(),f2=ctx.createBiquadFilter(),mix=ctx.createGain();
@@ -821,7 +827,7 @@ function flashMsg(t,ms){
   var _rt=retry;retry=function(){nearShown=false;lastLit=0;lastMoveAt=Date.now();catNapping=false;return _rt.apply(this,arguments)};
   setInterval(function(){
     if(!document.getElementById('puzzleScreen').classList.contains('active')||lock||catNapping)return;
-    if(Date.now()-lastMoveAt>30000){catNapping=true;if(IMG.cat_yawn){setCat('yawn');setTimeout(function(){if(catNapping&&!lock)setCat('sleep')},1900)}else setCat('sleep')}
+    if(Date.now()-lastMoveAt>(window.CAT_NAP||30000)){catNapping=true;if(IMG.cat_yawn){setCat('yawn');setTimeout(function(){if(catNapping&&!lock)setCat('sleep')},1900)}else setCat('sleep')}
   },2000);
 })();
 
@@ -922,7 +928,7 @@ function playWithDecor(){
   setInterval(function(){
     var now=Date.now();
     if(!nextPlayAt)nextPlayAt=now+7000;
-    if(now>=nextPlayAt){nextPlayAt=now+16000+Math.random()*14000;playWithDecor()}
+    if(now>=nextPlayAt){nextPlayAt=now+(16000+Math.random()*14000)*(window.CAT_PLAYF||1);playWithDecor()}
   },2500);
 })();
 
@@ -1017,16 +1023,16 @@ renderWeekly();renderAff();
 var CUR_CAT=(function(){try{return localStorage.pawCat||'gray'}catch(e){return'gray'}})();
 var CAT_DEFS=[
   {id:'gray',name:'별이',cost:0,prev:'cats/idle.webp'},
-  {id:'orange',name:'콩이',cost:0,p:['idle','lookup','paw','sad','clap','surprise','loaf','groom','back']},
-  {id:'black',name:'까망이',cost:0,p:['idle','paw','happy','sleep']},
-  {id:'tabby',name:'호두',cost:0,p:['idle','paw','happy','sleep']},
-  {id:'white',name:'미르',cost:0,p:['idle','paw','happy','sleep']},
-  {id:'calico',name:'나비',cost:0,p:['idle','paw','happy','sleep']},
-  {id:'ragdoll',name:'솜이',cost:0,p:['idle','paw','happy','sleep']},
-  {id:'russian',name:'안개',cost:0,p:['idle','paw','happy','sleep']},
-  {id:'bengal',name:'호피',cost:0,p:['idle','paw','happy','sleep']},
-  {id:'silver',name:'은별',cost:0,p:['idle','paw','happy','sleep']},
-  {id:'mainecoon',name:'밤이',cost:0,p:['idle','paw','happy','sleep']}
+  {id:'orange',name:'콩이',cost:80,p:['idle','lookup','paw','sad','clap','surprise','loaf','groom','back']},
+  {id:'black',name:'까망이',cost:60,p:['idle','paw','happy','sleep']},
+  {id:'tabby',name:'호두',cost:60,p:['idle','paw','happy','sleep']},
+  {id:'white',name:'미르',cost:80,p:['idle','paw','happy','sleep']},
+  {id:'calico',name:'나비',cost:100,p:['idle','paw','happy','sleep']},
+  {id:'ragdoll',name:'솜이',cost:100,p:['idle','paw','happy','sleep']},
+  {id:'russian',name:'안개',cost:100,p:['idle','paw','happy','sleep']},
+  {id:'bengal',name:'호피',cost:100,p:['idle','paw','happy','sleep']},
+  {id:'silver',name:'은별',cost:120,p:['idle','paw','happy','sleep']},
+  {id:'mainecoon',name:'밤이',cost:120,p:['idle','paw','happy','sleep']}
 ];
 var CAT_KNOWN=['idle','lookup','paw','receive','sleep','happy','yawn','stretch','smile','groom','loaf','basket','play_yarn','play_fish','play_plant','sad','clap','surprise','back'];
 var CAT_POOL_W={idle:40,lookup:15,paw:12,happy:14,sleep:6,groom:10,loaf:8,back:5,clap:4,surprise:3};
@@ -1076,15 +1082,15 @@ function poseImg(names){for(var i=0;i<names.length;i++)if(IMG['cat_'+names[i]])r
 /* ---- 배경 ---- */
 var BG_DEFS=[
   {id:'default',name:'초승달 밤',cost:0},
-  {id:'rain',name:'비 오는 밤',cost:0},
-  {id:'snow',name:'눈 오는 밤',cost:0},
-  {id:'sunset',name:'노을 저녁',cost:0},
-  {id:'meteor',name:'별똥별 밤',cost:0},
-  {id:'sakura',name:'벚꽃 밤',cost:0},
-  {id:'autumn',name:'단풍 노을',cost:0},
-  {id:'aurora',name:'오로라 밤',cost:0},
-  {id:'halloween',name:'할로윈 밤',cost:0},
-  {id:'christmas',name:'크리스마스 밤',cost:0}
+  {id:'rain',name:'비 오는 밤',cost:30},
+  {id:'snow',name:'눈 오는 밤',cost:40},
+  {id:'sunset',name:'노을 저녁',cost:40},
+  {id:'meteor',name:'별똥별 밤',cost:50},
+  {id:'sakura',name:'벚꽃 밤',cost:50},
+  {id:'autumn',name:'단풍 노을',cost:40},
+  {id:'aurora',name:'오로라 밤',cost:60},
+  {id:'halloween',name:'할로윈 밤',cost:50},
+  {id:'christmas',name:'크리스마스 밤',cost:60}
 ];
 var CUR_BG=(function(){try{return localStorage.pawBg||'default'}catch(e){return'default'}})();
 var bgOwned=(function(){try{var a=JSON.parse(localStorage.pawBgOwned||'["default"]');if(a.indexOf('default')<0)a.push('default');return a}catch(e){return['default']}})();
@@ -1150,10 +1156,10 @@ function buyBg(id){
   var art={yarn:['items/yarn.webp',30],fish:['items/fish.webp',26],plant:['items/plant.webp',40],basket:['items/basket.webp',32],
     lantern:['items/lantern.webp',44],bunny:['items/bunny.webp',40],flower:['items/flower.webp',42],cake:['items/cake.webp',36]};
   for(var k in art){decorItems[k].img=art[k][0];decorItems[k].h=art[k][1]}
-  decorItems.scratcher={name:'스크래처',emoji:'🪵',cost:0,img:'items/scratcher.webp',h:68};
-  decorItems.cushion={name:'폭신 쿠션',emoji:'🛏️',cost:0,img:'items/cushion.webp',h:26};
-  decorItems.tower={name:'캣타워',emoji:'🏰',cost:0,img:'items/tower.webp',h:82};
-  decorItems.lamp={name:'고양이 스탠드',emoji:'💡',cost:0,img:'items/lamp.webp',h:52};
+  decorItems.scratcher={name:'스크래처',emoji:'🪵',cost:25,img:'items/scratcher.webp',h:68};
+  decorItems.cushion={name:'폭신 쿠션',emoji:'🛏️',cost:25,img:'items/cushion.webp',h:26};
+  decorItems.tower={name:'캣타워',emoji:'🏰',cost:40,img:'items/tower.webp',h:82};
+  decorItems.lamp={name:'고양이 스탠드',emoji:'💡',cost:30,img:'items/lamp.webp',h:52};
   PLAY.scratcher={anim:'p-hop',pose:'paw',dur:2800,fx:'✨',msg:'🪵 고양이가 스크래처에 발톱을 갈아요'};
   PLAY.tower={anim:'',pose:'lookup',dur:3200,fx:'💕',msg:'🏰 고양이가 캣타워를 올려다봐요'};
   PLAY.cushion={anim:'',pose:'sleep',dur:6500,fx:'💤',msg:'🛏️ 고양이가 쿠션에서 쉬어요',inside:true};
@@ -1185,91 +1191,241 @@ function buyBg(id){
 applyBg();
 if(CUR_CAT!=='gray')applyCat(CUR_CAT);
 
-/* ===================== 같이 지내는 고양이 (홈 화면에서 돌아다님) ===================== */
-var ROOM_MAX=3;
-var roomIds=(function(){try{var a=JSON.parse(localStorage.pawRoom||'[]');return a.filter(function(x){return catsOwned.indexOf(x)>=0&&x!==CUR_CAT}).slice(0,ROOM_MAX)}catch(e){return[]}})();
-var roomers=[];
-function roomSave(){try{localStorage.pawRoom=JSON.stringify(roomIds)}catch(e){}}
-function roomSrc(id,pose){
-  if(id==='gray')return 'cats/'+pose+'.webp';
-  return 'cats/'+id+'/'+pose+'.webp';
-}
+/* ===================== 손님 고양이 (가끔 놀러 와서 잠깐 있다 감) ===================== */
+function roomDrop(){}
+try{localStorage.removeItem('pawRoom')}catch(e){}
+function roomSrc(id,pose){return id==='gray'?'cats/'+pose+'.webp':'cats/'+id+'/'+pose+'.webp'}
 function roomPoses(id){
-  if(id==='gray')return{walk:'idle',stay:['idle','lookup','paw','happy','groom'],rest:['sleep','loaf']};
-  var d=catDef(id),p=d.p,has=function(n){return p.indexOf(n)>=0};
-  var st=['idle'].concat(['lookup','paw','happy','groom'].filter(has));
+  if(id==='gray')return{walk:'idle',stay:['idle','lookup','happy','groom'],rest:['sleep','loaf']};
+  var p=catDef(id).p,has=function(n){return p.indexOf(n)>=0};
   var rest=['sleep','loaf'].filter(has);
-  return{walk:'idle',stay:st,rest:rest.length?rest:['idle']};
+  return{walk:'idle',stay:['idle'].concat(['lookup','happy','groom'].filter(has)),rest:rest.length?rest:['idle']};
 }
-function roomRebuild(){
-  roomers.forEach(function(r){r.el.remove()});roomers=[];
-  roomIds.forEach(function(id,i){
-    var el=document.createElement('img');el.className='cat roomCat';
-    var pz=roomPoses(id),b=7+Math.random()*9;
-    el.src=roomSrc(id,pz.walk);el.style.bottom=b+'%';el.style.height=(16+(16-b)*.25)+'%';el.style.zIndex=String(Math.round(22-b));
-    var x=6+(i+Math.random()*.6)*(58/Math.max(1,roomIds.length));el.style.left=x+'%';
-    homeCat.parentElement.appendChild(el);
-    var r={id:id,el:el,x:x,b:b,pz:pz,next:Date.now()+800+i*900,flip:false,pose:pz.walk,petAt:0};
-    el.addEventListener('pointerdown',function(ev){ev.stopPropagation();roomPet(r)});
-    roomers.push(r);
-  });
+var visitor=null,nextVisit=Date.now()+20000+Math.random()*15000;
+function homeBusy(){
+  if(!document.getElementById('homeScreen').classList.contains('active')||document.hidden)return true;
+  if(document.querySelector('.modal.on'))return true;
+  try{if(playing)return true}catch(e){}
+  return false;
 }
-function roomSet(r,pose){
-  r.pose=pose;r.el.src=roomSrc(r.id,pose);
-}
+function roomSet(r,pose){r.pose=pose;r.el.src=roomSrc(r.id,pose)}
 function roomPet(r){
   var now=Date.now();
   var fx=document.createElement('span');fx.className='playFx';fx.textContent=['💗','💕','✨'][Math.random()*3|0];
   fx.style.left=(r.x+6)+'%';fx.style.bottom=(r.b+17)+'%';decorSlot.appendChild(fx);setTimeout(function(){fx.remove()},1700);
   try{Snd.play('purr');haptic(10)}catch(e){}
-  if(r.pz.stay.indexOf('happy')>=0){roomSet(r,'happy');r.next=now+2200}else{r.next=now+1500}
+  if(r.pz.stay.indexOf('happy')>=0){roomSet(r,'happy');r.next=now+2500}
   r.el.classList.remove('hop');void r.el.offsetWidth;r.el.classList.add('hop');
-  if(now-r.petAt>800){r.petAt=now;try{var d=new Date().toDateString();if(localStorage.pawRoomPetDay!==d){localStorage.pawRoomPetDay=d;localStorage.pawRoomPetN=0}var n=Number(localStorage.pawRoomPetN||0);if(n<15){localStorage.pawRoomPetN=n+1;affAdd(1)}}catch(e){}}
-  if(Math.random()<.12){try{if(SETTINGS.sfx)Snd.play('meow')}catch(e){}}
+  try{var d=new Date().toDateString();if(localStorage.pawRoomPetDay!==d){localStorage.pawRoomPetDay=d;localStorage.pawRoomPetN=0}var n=Number(localStorage.pawRoomPetN||0);if(n<15){localStorage.pawRoomPetN=n+1;affAdd(1)}}catch(e){}
 }
-function roomTick(){
-  if(!roomers.length||document.hidden)return;
-  if(!document.getElementById('homeScreen').classList.contains('active'))return;
-  var now=Date.now(),scW=homeCat.parentElement.clientWidth||1;
-  roomers.forEach(function(r){
-    if(now<r.next)return;
-    r.el.classList.remove('walking');
-    var wPct=(r.el.offsetWidth/scW*100)||22,maxX=Math.max(8,100-wPct-3);
-    var roll=Math.random();
-    if(roll<.5){ // 걷기
-      var tx=3+Math.random()*(maxX-3),dx=tx-r.x;
-      if(Math.abs(dx)<8){r.next=now+700;return}
-      roomSet(r,r.pz.walk);
-      r.flip=dx<0;r.el.style.transform=r.flip?'scaleX(-1)':'';
-      var dur=Math.min(5.5,Math.max(1.6,Math.abs(dx)/7));
-      r.el.style.transition='left '+dur+'s linear';
-      r.el.classList.add('walking');r.el.style.left=tx+'%';r.x=tx;
-      r.next=now+dur*1000+400+Math.random()*1200;
-    }else if(roll<.8||!r.pz.rest.length){ // 잠깐 멈춰 서서 다른 포즈
-      var p=r.pz.stay[Math.random()*r.pz.stay.length|0];
-      r.el.style.transition='';roomSet(r,p);r.next=now+2500+Math.random()*3500;
-    }else{ // 쉬기
-      var q=r.pz.rest[Math.random()*r.pz.rest.length|0];
-      r.el.style.transition='';roomSet(r,q);r.next=now+7000+Math.random()*6000;
+function visitStart(){
+  var pool=catsOwned.filter(function(i){return i!==CUR_CAT});if(!pool.length)return false;
+  var id=pool[Math.random()*pool.length|0],def=catDef(id),pz=roomPoses(id);
+  var el=document.createElement('img');el.className='cat roomCat';
+  var b=8+Math.random()*5;el.src=roomSrc(id,pz.walk);el.style.bottom=b+'%';el.style.height='17%';el.style.zIndex=String(Math.round(22-b));
+  var fromLeft=Math.random()<.5;
+  el.style.left=(fromLeft?-30:104)+'%';el.style.transform=fromLeft?'':'scaleX(-1)';
+  homeCat.parentElement.appendChild(el);
+  var mainX=parseFloat(homeCat.style.left)||37;
+  var tx=mainX>45?Math.max(4,mainX-30):Math.min(66,mainX+28);
+  var r={id:id,name:def.name,el:el,x:tx,b:b,pz:pz,petAt:0,phase:'in',next:Date.now()+3600,leaveAt:Date.now()+22000+Math.random()*14000};
+  el.addEventListener('pointerdown',function(ev){ev.stopPropagation();roomPet(r)});
+  visitor=r;
+  void el.offsetWidth;
+  el.style.transition='left 3.2s linear';el.classList.add('walking');el.style.left=tx+'%';
+  try{photoToast.textContent='🐾 놀러 온 손님: '+def.name;setTimeout(function(){if(photoToast.textContent.indexOf('놀러')>=0)photoToast.textContent=''},3600)}catch(e){}
+  try{if(SETTINGS.sfx)Snd.play('meow')}catch(e){}
+  return true;
+}
+function visitTick(){
+  var now=Date.now();
+  if(!visitor){
+    if(now>=nextVisit&&!homeBusy()){if(!visitStart())nextVisit=now+120000}
+    return;
+  }
+  var r=visitor;
+  if(now<r.next)return;
+  if(r.phase==='in'){r.el.classList.remove('walking');r.phase='stay';roomSet(r,'idle');r.next=now+2500;return}
+  if(r.phase==='stay'){
+    if(now>=r.leaveAt&&!homeBusy()){
+      r.phase='out';roomSet(r,r.pz.walk);
+      var toLeft=r.x<50;r.el.style.transform=toLeft?'scaleX(-1)':'';
+      r.el.style.transition='left 3.2s linear';r.el.classList.add('walking');r.el.style.left=(toLeft?-30:104)+'%';
+      r.next=now+3400;return
     }
-  });
+    var roll=Math.random();r.el.style.transition='';
+    if(roll<.25&&r.pz.rest.length)roomSet(r,r.pz.rest[Math.random()*r.pz.rest.length|0]);
+    else roomSet(r,r.pz.stay[Math.random()*r.pz.stay.length|0]);
+    r.next=now+3500+Math.random()*3500;return
+  }
+  if(r.phase==='out'){r.el.remove();visitor=null;nextVisit=now+90000+Math.random()*90000}
 }
-setInterval(roomTick,500);
-function roomDrop(id){var i=roomIds.indexOf(id);if(i>=0){roomIds.splice(i,1);roomSave();roomRebuild()}}
-function toggleRoom(id){
-  if(id===CUR_CAT||catsOwned.indexOf(id)<0)return;
-  var i=roomIds.indexOf(id);
-  if(i>=0)roomIds.splice(i,1);
-  else{if(roomIds.length>=ROOM_MAX)roomIds.shift();roomIds.push(id)}
-  roomSave();roomRebuild();renderShop();
-}
+setInterval(visitTick,500);
+function toggleRoom(){}
 function catRow(c){
-  var own=catsOwned.indexOf(c.id)>=0,cur=CUR_CAT===c.id,inRoom=roomIds.indexOf(c.id)>=0;
-  var btns;
-  if(!own)btns='<button onclick="buyCat(\''+c.id+'\')">'+c.cost+'🌙</button>';
-  else if(cur)btns='<button disabled>대표 고양이</button>';
-  else btns='<button onclick="buyCat(\''+c.id+'\')">대표로</button><button class="'+(inRoom?'on':'')+'" onclick="toggleRoom(\''+c.id+'\')">'+(inRoom?'👥 함께 지냄':'같이 지내기')+'</button>';
-  return '<div class=shopRow><span class=shopIco><img src="'+(c.prev||('cats/'+c.id+'/idle.webp'))+'" height=44> '+c.name+'</span><span class=shopBtns>'+btns+'</span></div>';
+  var own=catsOwned.indexOf(c.id)>=0,cur=CUR_CAT===c.id;
+  var btn=!own?'<button onclick="buyCat(\''+c.id+'\')">'+c.cost+'🌙</button>':cur?'<button disabled>대표 고양이</button>':'<button onclick="buyCat(\''+c.id+'\')">대표로</button>';
+  return '<div class=shopRow><span class=shopIco><img src="'+(c.prev||('cats/'+c.id+'/idle.webp'))+'" height=44> '+c.name+(own&&!cur?' <small style="opacity:.6">· 가끔 놀러 와요</small>':'')+'</span><span class=shopBtns>'+btn+'</span></div>';
 }
-roomRebuild();
+
+/* ===================== 고양이 성격 / 말풍선 / 테스트용 무료 ===================== */
+var TEST_FREE=true; // 테스트 버전: 모든 비용 0 (출시 전에 false로)
+var CAT_PERS={
+  gray:{title:'다정한 동반자',desc:'사람을 좋아해서 쓰다듬으면 금방 가르랑거려요',pitch:1,chat:1,
+    pet:['가르랑~','더 쓰다듬어 줘요 💗','손이 따뜻해요'],clear:['잘했어요! 우리 최고예요','해냈어요, 같이 해서 좋아요'],fail:['괜찮아요, 천천히 해요','다시 해봐요, 옆에 있을게요'],idle:['오늘도 수고했어요','옆에 있을게요','잠깐 쉬어가요'],hello:['어서 와요, 여기 내 방이에요']},
+  orange:{title:'먹보 장난꾸러기',desc:'놀기 좋아해서 소품을 보면 자주 달려가요',pitch:1.15,chat:1.3,play:.6,
+    pet:['더 더~!','간식은 없나냥?','헤헤 좋아요'],clear:['와아 해냈다! 간식 주세요!','대박! 한 판 더 해요!'],fail:['으앙 아깝다! 다시, 다시!','괜찮아요! 놀다 보면 풀려요'],idle:['놀자놀자!','배고파요…','저 소품 좀 보세요!'],hello:['놀러 왔어요! 같이 놀아요!']},
+  black:{title:'새침한 밤고양이',desc:'말수가 적지만 밤이 되면 눈이 반짝여요',pitch:.85,chat:.5,
+    pet:['…흥, 허락해 줄게요','쓰다듬는 건 괜찮아요','…나쁘지 않네요'],clear:['…나쁘지 않은 솜씨네요','흥, 해낼 줄 알았어요'],fail:['…다시 하면 되죠','실수는 누구나 해요'],idle:['…밤이 좋아요','달이 예쁘네요'],hello:['…잠깐 앉아 있다 갈게요']},
+  tabby:{title:'호기심 탐험가',desc:'뭐든 냄새를 맡아보고 소품에 관심이 많아요',pitch:1.05,chat:1,play:.8,
+    pet:['어? 이건 뭐지?','킁킁, 좋은 냄새','하하 간지러워요'],clear:['새로운 발견이에요!','이런 길이 있었다니!'],fail:['다른 길을 찾아봐요','탐험은 원래 돌아가는 거예요'],idle:['저건 뭘까요?','구석구석 살펴볼래요','탐험 가고 싶어요'],hello:['새로운 방이네요! 구경할게요']},
+  white:{title:'순둥이 잠꾸러기',desc:'느긋해서 금방 졸아요. 가만히 있으면 잠들어요',pitch:.95,chat:.8,nap:15000,play:1.4,
+    pet:['포근해요…','하암… 좋아요','더 만져주세요… zZ'],clear:['와… 해냈네요, 대단해요','푹 쉬고 또 해요'],fail:['괜찮아요… 쉬어가요','낮잠 자고 다시 해요'],idle:['하암… 졸려요','따뜻해서 좋아요','zZ…'],hello:['잠깐만… 여기서 졸아도 돼요?']},
+  calico:{title:'수다쟁이',desc:'하고 싶은 말이 많아서 말풍선이 자주 떠요',pitch:1.25,chat:2.2,
+    pet:['있잖아요, 오늘은요~','냐앙 냐앙!','너무 좋아서 말이 안 나와요! (나오지만요)'],clear:['봤어요? 제가 응원했죠!','대단해요 대단해요 대단해요!'],fail:['아이, 아쉬워라! 다시 해요!','어머 어머, 한 칸만 더!'],idle:['오늘 뭐 했어요?','저기요 저기요~','할 말이 있는데요!'],hello:['안녕안녕! 놀러 왔어요!']},
+  ragdoll:{title:'우아한 귀족',desc:'품위 있게 행동하지만 쓰다듬는 건 좋아해요',pitch:1,chat:.9,
+    pet:['흠, 괜찮군요','품위 있게 부탁해요','오호호, 좋아요'],clear:['훌륭해요, 인정하죠','역시 제가 지켜본 보람이 있네요'],fail:['괜찮아요, 우아하게 다시요','실수도 품격의 일부죠'],idle:['차 한 잔 하고 싶네요','달빛이 좋군요'],hello:['실례합니다, 잠시 머물러도 될까요?']},
+  russian:{title:'조용한 관찰자',desc:'말이 거의 없고 퍼즐을 지켜보는 걸 좋아해요',pitch:.8,chat:.4,
+    pet:['…','…가르릉','…고마워요'],clear:['…잘했어요','…지켜보고 있었어요'],fail:['…집중해 봐요','…거의 다 왔었어요'],idle:['…','…조용하네요'],hello:['…']},
+  bengal:{title:'모험가 사냥꾼',desc:'활동적이고 소품을 보면 사냥 본능이 깨어나요',pitch:1.1,chat:1.1,play:.7,
+    pet:['어흥! 아니, 야옹~','사냥 중인데… 뭐 좋아요','헤헤, 간지러워요'],clear:['사냥 성공이에요!','어흥! 해냈어요!'],fail:['도전은 계속돼요!','다음 사냥은 성공해요!'],idle:['사냥 준비 완료!','뭔가 움직였어요!','모험 가고 싶어요'],hello:['사냥터 구경 왔어요!']},
+  silver:{title:'포근한 솜뭉치',desc:'털이 풍성해서 포근하고 응석을 잘 부려요',pitch:1.1,chat:1.2,
+    pet:['부비부비~','더 안아주세요','솜사탕처럼 폭신하죠?'],clear:['와아, 폭신하게 잘했어요!','칭찬해 주세요~'],fail:['토닥토닥, 괜찮아요','안아줄게요, 다시 해요'],idle:['안아주세요~','털이 보송보송해요','졸졸 따라다닐래요'],hello:['안녕~ 안아줘도 돼요?']},
+  mainecoon:{title:'듬직한 형님',desc:'덩치만큼 마음도 넓어서 든든하게 곁을 지켜요',pitch:.75,chat:.8,
+    pet:['허허, 좋구나','든든하지?','걱정 말고 쉬어요'],clear:['허허, 잘 하는데?','역시 해낼 줄 알았다'],fail:['걱정 마, 내가 있잖아','다시 하면 되지, 천천히 하렴'],idle:['걱정 마, 내가 지켜볼게','오늘도 평화롭구나'],hello:['허허, 놀러 왔다']}
+};
+function pers(id){return CAT_PERS[id||CUR_CAT]||CAT_PERS.gray}
+function pickLine(kind,id){var a=pers(id)[kind]||[];return a[Math.random()*a.length|0]||''}
+function applyPersona(){
+  var p=pers();window.CAT_PITCH=p.pitch||1;window.CAT_PLAYF=p.play||1;window.CAT_NAP=p.nap||30000;
+}
+(function(){var _a=applyCat;applyCat=function(id){var r=_a.apply(this,arguments);applyPersona();return r}})();
+applyPersona();
+/* 말풍선 */
+var sayTimer=0;
+function say(text,target,ms){
+  if(!text||document.querySelector('.modal.on'))return;
+  var scene=document.querySelector('#homeScreen .homeScene');if(!scene)return;
+  var b=document.getElementById('catSay');
+  if(!b){b=document.createElement('div');b.id='catSay';scene.appendChild(b)}
+  var t=target||homeCat,sc=scene.getBoundingClientRect(),cr=t.getBoundingClientRect();
+  b.textContent=text;b.className='say on';
+  var cx=cr.left+cr.width/2-sc.left;
+  b.style.left=Math.max(8,Math.min(sc.width-8,cx))+'px';
+  b.style.bottom=(sc.bottom-cr.top+2)+'px';
+  clearTimeout(sayTimer);sayTimer=setTimeout(function(){b.className='say'},ms||2800);
+}
+homeCat.addEventListener('pointerdown',function(){if(!aiming&&Math.random()<.4)say(pickLine('pet'))});
+var nextChat=Date.now()+15000;
+setInterval(function(){
+  var now=Date.now();if(now<nextChat)return;
+  var p=pers();nextChat=now+(30000+Math.random()*30000)/(p.chat||1);
+  if(!homeBusy()&&!aiming&&!visitor)say(pickLine('idle'));
+},4000);
+/* 손님이 올 때 인사 */
+(function(){var _vs=visitStart;visitStart=function(){var ok=_vs.apply(this,arguments);if(ok&&visitor){var v=visitor;setTimeout(function(){if(visitor===v)say(pickLine('hello',v.id),v.el,3000)},3700)}return ok}})();
+/* 클리어/실패 화면 한마디 */
+(function(){
+  var cc=document.getElementById('clearCat'),fc=document.getElementById('failCat');
+  cc.insertAdjacentHTML('afterend','<div id=clearSay class=sayLine></div>');
+  fc.insertAdjacentHTML('afterend','<div id=failSay class=sayLine></div>');
+  var _fm=failMsg;failMsg=function(){var r=_fm.apply(this,arguments);try{failSay.textContent='“'+pickLine('fail')+'”'}catch(e){}return r};
+  var _sc=showClear;showClear=function(){var r=_sc.apply(this,arguments);try{clearSay.textContent='“'+pickLine('clear')+'”'}catch(e){}return r};
+})();
+/* 상점 행: 이름 + 성격 */
+catRow=function(c){
+  var own=catsOwned.indexOf(c.id)>=0,cur=CUR_CAT===c.id,p=pers(c.id);
+  var btn=!own?'<button onclick="buyCat(\''+c.id+'\')">'+(c.cost?c.cost+'🌙':'무료')+'</button>':cur?'<button disabled>대표 고양이</button>':'<button onclick="buyCat(\''+c.id+'\')">대표로</button>';
+  return '<div class=shopRow><span class=shopIco><img src="'+(c.prev||('cats/'+c.id+'/idle.webp'))+'" height=48><span class=catInfo><b>'+c.name+'</b> <small>'+p.title+'</small><em>'+p.desc+'</em></span></span><span class=shopBtns>'+btn+'</span></div>';
+};
+(function(){var _bc=buyCat;buyCat=function(id){var was=CUR_CAT;_bc.apply(this,arguments);if(CUR_CAT===id&&was!==id)setTimeout(function(){say(pickLine('hello',id))},700)}})();
+/* 테스트용: 모든 비용 0 */
+if(TEST_FREE){
+  CAT_DEFS.forEach(function(c){c.cost=0});BG_DEFS.forEach(function(b){b.cost=0});
+  for(var k in decorItems)decorItems[k].cost=0;
+  for(var t in themeData)themeData[t].cost=0;
+  var _hint=hint;hint=function(){var s0=stars;stars=Math.max(stars,5);var r=_hint.apply(this,arguments);stars=s0;wallet.textContent='⭐ '+stars;try{localStorage.pawStars=stars}catch(e){}return r};
+  var _ext=extend;extend=function(){var s0=stars;stars=Math.max(stars,5);var r=_ext.apply(this,arguments);stars=s0;wallet.textContent='⭐ '+stars;try{localStorage.pawStars=stars}catch(e){}return r};
+  document.querySelector('#settingsModal .card h3').insertAdjacentHTML('afterend','<div style="font-size:12px;opacity:.75;margin:-4px 0 8px">🧪 테스트 버전 — 상점·힌트·연장 비용이 모두 0입니다</div>');
+  var hb=document.querySelector('button[onclick="hint()"] b');if(hb)hb.textContent='힌트 무료';
+}
+
+/* ===================== 소품 고정 배치 + 점프해서 이용 ===================== */
+var ITEM_POS={
+  tower:{l:76,b:16},scratcher:{l:6,b:14},lamp:{l:84,b:30},basket:{l:16,b:7},cushion:{l:66,b:7},
+  plant:{l:70,b:27},yarn:{l:30,b:5},fish:{l:56,b:5},lantern:{l:24,b:27},bunny:{l:14,b:27},
+  flower:{l:60,b:27},cake:{l:58,b:8},pumpkin:{l:8,b:26},tree:{l:2,b:28},kite:{l:72,b:22},snow:{l:18,b:26}
+};
+PLAY.tower.perch=.9;PLAY.cushion.perch=.45;
+renderDecorSlot=function(){
+  decorSlot.innerHTML=equippedDecor.map(function(k){
+    var d=decorItems[k];if(!d)return'';
+    var ps=ITEM_POS[k]||{l:60,b:8},pos='left:'+ps.l+'%;bottom:'+ps.b+'%;';
+    return d.img?'<img class="decorItem" data-k="'+k+'" src="'+d.img+'" style="'+pos+'height:'+d.h+'px;width:auto">':'<span class="decorItem" data-k="'+k+'" style="'+pos+'font-size:26px">'+d.emoji+'</span>';
+  }).join('');
+};
+renderDecorSlot();
+function catWalk(x,ms,cb){
+  homeCat.style.transition='left '+ms+'ms linear';homeCat.classList.add('walking');homeCat.style.left=x+'%';
+  setTimeout(function(){homeCat.classList.remove('walking');if(cb)cb()},ms);
+}
+function catJump(x,bottomPct,arcPx,ms,cb){
+  homeCat.classList.remove('walking');
+  homeCat.style.transition='left '+ms+'ms ease-in-out, bottom '+ms+'ms ease-in-out';
+  homeCat.style.left=x+'%';homeCat.style.bottom=bottomPct+'%';
+  try{homeCat.animate([{translate:'0 0'},{translate:'0 -'+arcPx+'px',offset:.45},{translate:'0 0'}],{duration:ms,easing:'ease-in-out'})}catch(e){}
+  setTimeout(cb,ms);
+}
+playWithDecor=function(){
+  if(playing||aiming)return;
+  if(!document.getElementById('homeScreen').classList.contains('active'))return;
+  var els=decorSlot.querySelectorAll('.decorItem');if(!els.length)return;
+  var idx=Math.random()*els.length|0,el=els[idx],key=el.getAttribute('data-k'),cfg=PLAY[key];if(!cfg)return;
+  playing=true;playKey=key;stopHomePoseCycle();
+  var sc=homeCat.parentElement.getBoundingClientRect();
+  var il=parseFloat(el.style.left)||60,ib=parseFloat(el.style.bottom)||8;
+  var iw=el.offsetWidth/sc.width*100,ih=el.offsetHeight;
+  var pk=IMG['cat_'+cfg.pose]?cfg.pose:(cfg.alt&&IMG['cat_'+cfg.alt]?cfg.alt:'lookup'),own=(pk===cfg.pose&&cfg.hide);
+  var pim=IMG['cat_'+pk],catH=(own&&cfg.big?cfg.big:20);
+  var cw=pim.naturalWidth/pim.naturalHeight*catH*sc.height/sc.width;
+  var home0=parseFloat(homeCat.style.left)||37;
+  // 도착 지점
+  var tx,tb=13;
+  if(own){tx=Math.max(0,Math.min(100-cw,il+iw/2-cfg.ax*cw));tb=ib}
+  else if(cfg.perch){tx=il+iw/2-cw/2;tb=ib+ih*cfg.perch/sc.height*100}
+  else{tx=(il>50)?il-cw*.85:il+iw+1;tb=13}
+  tx=Math.max(0,Math.min(100-cw,tx));
+  var facingRight=(tx+cw/2)<(il+iw/2);
+  currentPose='idle';homeCat.src=IMG.cat_idle.src;
+  var launch=tx+(tx>home0?-12:12);launch=Math.max(0,Math.min(100-cw,launch));
+  homeCat.style.transform=(tx>home0)?'':'scaleX(-1)';
+  var dist=Math.abs(launch-home0),wms=Math.max(500,dist*45);
+  function land(){
+    homeCat.style.transform=facingRight?'':'scaleX(-1)';
+    currentPose=pk;homeCat.src=IMG['cat_'+pk].src;
+    if(own)el.style.visibility='hidden';
+    var _an=own?cfg.anim:(cfg.anim||cfg.anim2);cfg._an=_an;if(_an)el.classList.add(_an);
+    var fx=document.createElement('span');fx.className='playFx';fx.textContent=cfg.fx;fx.style.left=(il+iw/2)+'%';fx.style.bottom=(ib+16)+'%';decorSlot.appendChild(fx);setTimeout(function(){fx.remove()},1700);
+    if(!photoToast.textContent)photoToast.textContent=cfg.msg;
+    if(SETTINGS.sfx&&Math.random()<.5)Snd.play('meow');
+    setTimeout(leave,cfg.dur);
+  }
+  function leave(){
+    if(cfg._an)el.classList.remove(cfg._an);
+    el.style.visibility='';
+    if(photoToast.textContent===cfg.msg)photoToast.textContent='';
+    currentPose='idle';homeCat.src=IMG.cat_idle.src;
+    homeCat.style.transform=(home0>tx)?'':'scaleX(-1)';
+    catJump(Math.max(0,Math.min(100-cw,tx+(home0>tx?12:-12))),13,28+Math.max(0,tb-13)*3,650,function(){
+      catWalk(home0,Math.max(500,Math.abs(tx-home0)*45),function(){
+        homeCat.style.transition='';homeCat.style.transform='';homeCat.style.left=home0+'%';homeCat.style.bottom='13%';
+        playing=false;playKey=null;
+        if(document.getElementById('homeScreen').classList.contains('active'))startHomePoseCycle();
+      });
+    });
+  }
+  catWalk(launch,wms,function(){
+    catJump(tx,tb,34+Math.max(0,tb-13)*3.2,700,land);
+  });
+};
 </script><script>if('serviceWorker' in navigator&&location.protocol!=='file:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script></body></html>
