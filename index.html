@@ -256,10 +256,10 @@ function completeDailyIfNeeded(){
 
 // ===== 방 소품(달빛으로 구매, 고양이 옆에서 흔들리는 연출) =====
 const decorItems = {
-  yarn:{name:'실뭉치', emoji:'🧶', cost:20},
-  fish:{name:'물고기 장난감', emoji:'🐟', cost:30},
-  plant:{name:'화분', emoji:'🪴', cost:15},
-  basket:{name:'바구니', emoji:'🧺', cost:25},
+  yarn:{name:'실뭉치', emoji:'🧶', cost:0},
+  fish:{name:'물고기 장난감', emoji:'🐟', cost:0},
+  plant:{name:'화분', emoji:'🪴', cost:0},
+  basket:{name:'바구니', emoji:'🧺', cost:0},
   lantern:{name:'작은 등불', emoji:'🏮', cost:0, weekly:true},
   pumpkin:{name:'호박', emoji:'🎃', cost:0, weekly:true},
   tree:{name:'작은 트리', emoji:'🎄', cost:0, weekly:true},
@@ -438,42 +438,42 @@ const themeData = {
 
   theme_aurora:{
     name:'오로라 민트',
-    cost:1,
+    cost:0,
     glow:'#7fe7c4',
     warm:'#bdf5e6'
   },
 
   theme_sunset:{
     name:'노을 코랄',
-    cost:1,
+    cost:0,
     glow:'#ff8a65',
     warm:'#ffc4ad'
   },
 
   theme_moonlight:{
     name:'달빛 블루',
-    cost:2,
+    cost:0,
     glow:'#6fb5ff',
     warm:'#b8ddff'
   },
 
   theme_lavender:{
     name:'라벤더 드림',
-    cost:2,
+    cost:0,
     glow:'#b78cff',
     warm:'#dcc8ff'
   },
 
   theme_sakura:{
     name:'벚꽃 핑크',
-    cost:3,
+    cost:0,
     glow:'#ff89c5',
     warm:'#ffd2e9'
   },
 
   theme_starlight:{
     name:'은하수',
-    cost:5,
+    cost:0,
     glow:'#ffffff',
     warm:'#d6f4ff'
   }
@@ -1017,16 +1017,16 @@ renderWeekly();renderAff();
 var CUR_CAT=(function(){try{return localStorage.pawCat||'gray'}catch(e){return'gray'}})();
 var CAT_DEFS=[
   {id:'gray',name:'별이',cost:0,prev:'cats/idle.webp'},
-  {id:'orange',name:'콩이',cost:80,p:['idle','lookup','paw','sad','clap','surprise','loaf','groom','back']},
-  {id:'black',name:'까망이',cost:60,p:['idle','paw','happy','sleep']},
-  {id:'tabby',name:'호두',cost:60,p:['idle','paw','happy','sleep']},
-  {id:'white',name:'미르',cost:80,p:['idle','paw','happy','sleep']},
-  {id:'calico',name:'나비',cost:100,p:['idle','paw','happy','sleep']},
-  {id:'ragdoll',name:'솜이',cost:100,p:['idle','paw','happy','sleep']},
-  {id:'russian',name:'안개',cost:100,p:['idle','paw','happy','sleep']},
-  {id:'bengal',name:'호피',cost:100,p:['idle','paw','happy','sleep']},
-  {id:'silver',name:'은별',cost:120,p:['idle','paw','happy','sleep']},
-  {id:'mainecoon',name:'밤이',cost:120,p:['idle','paw','happy','sleep']}
+  {id:'orange',name:'콩이',cost:0,p:['idle','lookup','paw','sad','clap','surprise','loaf','groom','back']},
+  {id:'black',name:'까망이',cost:0,p:['idle','paw','happy','sleep']},
+  {id:'tabby',name:'호두',cost:0,p:['idle','paw','happy','sleep']},
+  {id:'white',name:'미르',cost:0,p:['idle','paw','happy','sleep']},
+  {id:'calico',name:'나비',cost:0,p:['idle','paw','happy','sleep']},
+  {id:'ragdoll',name:'솜이',cost:0,p:['idle','paw','happy','sleep']},
+  {id:'russian',name:'안개',cost:0,p:['idle','paw','happy','sleep']},
+  {id:'bengal',name:'호피',cost:0,p:['idle','paw','happy','sleep']},
+  {id:'silver',name:'은별',cost:0,p:['idle','paw','happy','sleep']},
+  {id:'mainecoon',name:'밤이',cost:0,p:['idle','paw','happy','sleep']}
 ];
 var CAT_KNOWN=['idle','lookup','paw','receive','sleep','happy','yawn','stretch','smile','groom','loaf','basket','play_yarn','play_fish','play_plant','sad','clap','surprise','back'];
 var CAT_POOL_W={idle:40,lookup:15,paw:12,happy:14,sleep:6,groom:10,loaf:8,back:5,clap:4,surprise:3};
@@ -1076,15 +1076,15 @@ function poseImg(names){for(var i=0;i<names.length;i++)if(IMG['cat_'+names[i]])r
 /* ---- 배경 ---- */
 var BG_DEFS=[
   {id:'default',name:'초승달 밤',cost:0},
-  {id:'rain',name:'비 오는 밤',cost:30},
-  {id:'snow',name:'눈 오는 밤',cost:40},
-  {id:'sunset',name:'노을 저녁',cost:40},
-  {id:'meteor',name:'별똥별 밤',cost:50},
-  {id:'sakura',name:'벚꽃 밤',cost:50},
-  {id:'autumn',name:'단풍 노을',cost:40},
-  {id:'aurora',name:'오로라 밤',cost:60},
-  {id:'halloween',name:'할로윈 밤',cost:50},
-  {id:'christmas',name:'크리스마스 밤',cost:60}
+  {id:'rain',name:'비 오는 밤',cost:0},
+  {id:'snow',name:'눈 오는 밤',cost:0},
+  {id:'sunset',name:'노을 저녁',cost:0},
+  {id:'meteor',name:'별똥별 밤',cost:0},
+  {id:'sakura',name:'벚꽃 밤',cost:0},
+  {id:'autumn',name:'단풍 노을',cost:0},
+  {id:'aurora',name:'오로라 밤',cost:0},
+  {id:'halloween',name:'할로윈 밤',cost:0},
+  {id:'christmas',name:'크리스마스 밤',cost:0}
 ];
 var CUR_BG=(function(){try{return localStorage.pawBg||'default'}catch(e){return'default'}})();
 var bgOwned=(function(){try{var a=JSON.parse(localStorage.pawBgOwned||'["default"]');if(a.indexOf('default')<0)a.push('default');return a}catch(e){return['default']}})();
@@ -1150,10 +1150,10 @@ function buyBg(id){
   var art={yarn:['items/yarn.webp',30],fish:['items/fish.webp',26],plant:['items/plant.webp',40],basket:['items/basket.webp',32],
     lantern:['items/lantern.webp',44],bunny:['items/bunny.webp',40],flower:['items/flower.webp',42],cake:['items/cake.webp',36]};
   for(var k in art){decorItems[k].img=art[k][0];decorItems[k].h=art[k][1]}
-  decorItems.scratcher={name:'스크래처',emoji:'🪵',cost:25,img:'items/scratcher.webp',h:68};
-  decorItems.cushion={name:'폭신 쿠션',emoji:'🛏️',cost:25,img:'items/cushion.webp',h:26};
-  decorItems.tower={name:'캣타워',emoji:'🏰',cost:40,img:'items/tower.webp',h:82};
-  decorItems.lamp={name:'고양이 스탠드',emoji:'💡',cost:30,img:'items/lamp.webp',h:52};
+  decorItems.scratcher={name:'스크래처',emoji:'🪵',cost:0,img:'items/scratcher.webp',h:68};
+  decorItems.cushion={name:'폭신 쿠션',emoji:'🛏️',cost:0,img:'items/cushion.webp',h:26};
+  decorItems.tower={name:'캣타워',emoji:'🏰',cost:0,img:'items/tower.webp',h:82};
+  decorItems.lamp={name:'고양이 스탠드',emoji:'💡',cost:0,img:'items/lamp.webp',h:52};
   PLAY.scratcher={anim:'p-hop',pose:'paw',dur:2800,fx:'✨',msg:'🪵 고양이가 스크래처에 발톱을 갈아요'};
   PLAY.tower={anim:'',pose:'lookup',dur:3200,fx:'💕',msg:'🏰 고양이가 캣타워를 올려다봐요'};
   PLAY.cushion={anim:'',pose:'sleep',dur:6500,fx:'💤',msg:'🛏️ 고양이가 쿠션에서 쉬어요',inside:true};
