@@ -59,6 +59,14 @@
     "play_plant": {
       "file": "cats/play_plant.webp",
       "w": 0
+    },
+    "groom": {
+      "file": "cats/groom.webp",
+      "w": 10
+    },
+    "loaf": {
+      "file": "cats/loaf.webp",
+      "w": 8
     }
   }
 }
