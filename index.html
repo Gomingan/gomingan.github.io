@@ -1023,19 +1023,19 @@ renderWeekly();renderAff();
 var CUR_CAT=(function(){try{return localStorage.pawCat||'gray'}catch(e){return'gray'}})();
 var CAT_DEFS=[
   {id:'gray',name:'별이',cost:0,prev:'cats/idle.webp'},
-  {id:'orange',name:'콩이',cost:80,p:['idle','lookup','paw','sad','clap','surprise','loaf','groom','back']},
-  {id:'black',name:'까망이',cost:60,p:['idle','paw','happy','sleep']},
-  {id:'tabby',name:'호두',cost:60,p:['idle','paw','happy','sleep']},
+  {id:'orange',name:'콩이',cost:80,p:['idle','lookup','paw','sad','clap','surprise','loaf','groom','back','happy','sleep','smile','stretch']},
+  {id:'black',name:'까망이',cost:60,p:['idle','paw','happy','sleep','smile','yawn','loaf']},
+  {id:'tabby',name:'호두',cost:60,p:['idle','paw','happy','sleep','loaf','lookup','stretch']},
   {id:'white',name:'미르',cost:80,p:['idle','paw','happy','sleep']},
   {id:'calico',name:'나비',cost:100,p:['idle','paw','happy','sleep']},
   {id:'ragdoll',name:'솜이',cost:100,p:['idle','paw','happy','sleep']},
-  {id:'russian',name:'안개',cost:100,p:['idle','paw','happy','sleep']},
+  {id:'russian',name:'안개',cost:100,p:['idle','paw','happy','sleep','lookup','groom']},
   {id:'bengal',name:'호피',cost:100,p:['idle','paw','happy','sleep']},
   {id:'silver',name:'은별',cost:120,p:['idle','paw','happy','sleep']},
   {id:'mainecoon',name:'밤이',cost:120,p:['idle','paw','happy','sleep']}
 ];
 var CAT_KNOWN=['idle','lookup','paw','receive','sleep','happy','yawn','stretch','smile','groom','loaf','basket','play_yarn','play_fish','play_plant','sad','clap','surprise','back'];
-var CAT_POOL_W={idle:40,lookup:15,paw:12,happy:14,sleep:6,groom:10,loaf:8,back:5,clap:4,surprise:3};
+var CAT_POOL_W={idle:40,lookup:15,paw:12,happy:14,sleep:6,groom:10,loaf:8,back:5,clap:4,surprise:3,smile:8,yawn:6,stretch:7};
 var catsOwned=(function(){try{var a=JSON.parse(localStorage.pawCatsOwned||'["gray"]');if(a.indexOf('gray')<0)a.push('gray');return a}catch(e){return['gray']}})();
 function catDef(id){for(var i=0;i<CAT_DEFS.length;i++)if(CAT_DEFS[i].id===id)return CAT_DEFS[i];return CAT_DEFS[0]}
 function refreshCatImages(){
@@ -1427,5 +1427,30 @@ playWithDecor=function(){
   catWalk(launch,wms,function(){
     catJump(tx,tb,34+Math.max(0,tb-13)*3.2,700,land);
   });
+};
+/* ===================== 별이 점프 3컷(웅크림-공중-착지) ===================== */
+var JUMPART={};
+['crouch','air','land'].forEach(function(n){var im=new Image();im.onload=function(){JUMPART[n]=im};im.src='cats/jump/'+n+'.webp'});
+function jumpOn(){return CUR_CAT==='gray'&&JUMPART.crouch&&JUMPART.air&&JUMPART.land}
+function jumpPose(n){
+  if(!JUMPART[n])return;
+  homeCat.style.height=(20*560/480)+'%';homeCat.src=JUMPART[n].src;
+}
+function jumpReset(){homeCat.style.height=''}
+var _catJump0=catJump;
+catJump=function(x,bottomPct,arcPx,ms,cb){
+  if(!jumpOn())return _catJump0(x,bottomPct,arcPx,ms,cb);
+  homeCat.classList.remove('walking');
+  jumpPose('crouch');
+  setTimeout(function(){
+    jumpPose('air');
+    homeCat.style.transition='left '+ms+'ms ease-in-out, bottom '+ms+'ms ease-in-out';
+    homeCat.style.left=x+'%';homeCat.style.bottom=bottomPct+'%';
+    try{homeCat.animate([{translate:'0 0'},{translate:'0 -'+arcPx+'px',offset:.45},{translate:'0 0'}],{duration:ms,easing:'ease-in-out'})}catch(e){}
+    setTimeout(function(){
+      jumpPose('land');
+      setTimeout(function(){jumpReset();cb()},170);
+    },ms);
+  },200);
 };
 </script><script>if('serviceWorker' in navigator&&location.protocol!=='file:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script></body></html>
