@@ -67,6 +67,22 @@
     "loaf": {
       "file": "cats/loaf.webp",
       "w": 8
+    },
+    "sad": {
+      "file": "cats/sad.webp",
+      "w": 0
+    },
+    "clap": {
+      "file": "cats/clap.webp",
+      "w": 4
+    },
+    "surprise": {
+      "file": "cats/surprise.webp",
+      "w": 3
+    },
+    "back": {
+      "file": "cats/back.webp",
+      "w": 5
     }
   }
 }
