@@ -56,7 +56,7 @@ button{border:0;border-radius:9px;background:#413a59;color:#fff;padding:8px 13px
 .photoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
 .photoCard{background:#1c1f38aa;border-radius:10px;padding:6px;font-size:10px;line-height:1.4}
 .photoCard img{width:100%;border-radius:6px;background:#00000040;display:block}
-.viewfinder{position:absolute;width:72px;height:72px;border:3px solid #ffffffcc;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:none;z-index:8;box-shadow:0 0 0 2000px #00000055, 0 0 14px #000a}
+.viewfinder{position:absolute;width:124px;height:124px;border:3px solid #ffffffcc;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:none;z-index:8;box-shadow:0 0 0 2000px #00000055, 0 0 14px #000a}
 .viewfinder.active{display:block}
 .viewfinder::before,.viewfinder::after{content:'';position:absolute;background:#ffffffcc}
 .viewfinder::before{left:50%;top:-9px;width:2px;height:9px;transform:translateX(-50%)}
@@ -136,7 +136,8 @@ body{min-height:100vh;min-height:100dvh}
 .catInfo{display:flex;flex-direction:column;line-height:1.25}.catInfo small{font-size:11px;color:#ffd98a;font-weight:600}.catInfo em{font-size:11px;opacity:.65;font-style:normal;max-width:150px}
 #homeCat.walking{animation:walkBob .42s ease-in-out infinite}
 @keyframes starPop{0%{transform:scale(0) rotate(-140deg);opacity:0}60%{transform:scale(1.5) rotate(10deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}@keyframes rewardUp{0%{transform:translateY(24px) scale(.6);opacity:0}100%{transform:none;opacity:1}}#clearStars span{display:inline-block}#clearCat{display:none!important}
-.coachCard{display:block!important;box-sizing:border-box}.coachCard:not([style*="block"]){visibility:hidden;padding:0;border:0;margin-top:0}
+.coachCard{display:block!important;box-sizing:border-box}.coachCard:not([style*="block"]){visibility:hidden}.coachCard:not([style*="block"]):not([style*="min-height"]){padding:0;border:0;margin-top:0}
+.viewfinder.glide{transition:left .2s ease-out,top .2s ease-out}
 </style></head>
 <body><div id=a>
 <div class=top id=topbar><b>🐾 PAWLIGHT</b><span id=wallet>⭐ 0</span><span id=moonWallet>🌙 0</span><span class=topBtns><button id=shopBtn>🛍️</button><button id=settingsBtn onclick="openSettings()">⚙️</button><button id=dbgBtn style="display:none">🐞</button></span></div>
@@ -145,6 +146,7 @@ body{min-height:100vh;min-height:100dvh}
   <div class=homeScene><img class=bg id=homeBg src=""><img class=cat id=homeCat src="" style="left:37%;bottom:13%;height:20%;width:auto"><div id=decorSlot></div><div class=viewfinder id=viewfinder></div><button class=cameraBtn id=cameraBtn onclick="enterAimMode()">📷</button><button class=aimCancel id=aimCancel onclick="cancelAim()" style="display:none">✕</button></div>
   <div class=photoToast id=photoToast></div><div class=affRow id=affRow></div><div class=homeTip id=homeTip>👋 "퍼즐하기"로 별빛 길을 이어주고, 📷으로 귀여운 순간을 찍어보세요. 고양이를 톡 쓰다듬을 수도 있어요</div>
   <p class=tagline>작은 별빛이, 더 따뜻한 하루를 만들어줘.</p>
+  <div class=dailyCard id=attCard onclick="openAttend()" style="cursor:pointer"></div>
   <div class=dailyCard id=dailyCard></div>
   <div class=dailyCard id=weeklyCard style="margin-top:6px"></div>
   <button class=bigBtn onclick="goPuzzle()">🌙 &nbsp;퍼즐하기</button>
@@ -194,8 +196,30 @@ body{min-height:100vh;min-height:100dvh}
 <div class=setRow><span>📳 진동</span><button id=setHaptic onclick="toggleSetting('haptic')"></button></div>
 <div class=setNote id=hapticNote style="display:none">※ iPhone의 웹앱은 진동을 지원하지 않아요 (앱스토어 버전에서 지원 예정)</div>
 <div class=setRow><span>📖 튜토리얼</span><button onclick="resetTutorial()">다시 보기</button></div>
+<div class=setRow><span>💾 백업 / 복원</span><button onclick="openBackup()">열기</button></div>
 <div class=setRow><span>🗑️ 데이터</span><button id=resetBtn onclick="resetData()">초기화</button></div>
 <button onclick="settingsModal.classList.remove('on')">닫기</button></div></div>
+<div class=modal id=backupModal><div class=card><h3>💾 백업 / 복원</h3>
+<p style="color:#cdd1ea;font-size:13px;line-height:1.6;margin:0 0 8px">폰을 바꾸거나 앱을 지우기 전에 백업해 두세요. 별·달빛·고양이·소품·사진·스테이지가 모두 저장돼요.</p>
+<div class=setRow><span>📁 파일로 저장</span><button onclick="backupFile()">저장</button></div>
+<div class=setRow><span>📋 코드 복사 (사진 제외)</span><button onclick="backupCopy()">복사</button></div>
+<textarea id=bkText rows=4 placeholder="복원할 백업 코드를 여기에 붙여넣으세요" style="width:100%;box-sizing:border-box;margin-top:8px;border-radius:10px;background:#1a1f3a;color:#e8eaff;border:1px solid #3a4170;padding:8px;font-size:12px"></textarea>
+<div class=setRow><span>♻️ 코드로 복원</span><button onclick="restoreText()">복원</button></div>
+<div class=setRow><span>📂 파일에서 복원</span><button onclick="bkFile.click()">선택</button></div>
+<input type=file id=bkFile accept=".json,application/json" style="display:none" onchange="restoreFile(this)">
+<div class=setNote id=bkMsg></div>
+<button onclick="backupModal.classList.remove('on')">닫기</button></div></div>
+<div class=modal id=moonModal><div class=card><h3>🌙 달빛 충전</h3>
+<p style="color:#cdd1ea;font-size:13px;line-height:1.6;margin:0 0 8px">달빛으로 새 고양이와 배경을 만날 수 있어요.<br>무료로도 모을 수 있어요: 매일 임무 +5, 주간 특별한 밤 +10, 퍼즐 5판 클리어마다 +2</p>
+<div id=moonPacks></div>
+<div class=setNote id=moonMsg></div>
+<button onclick="moonModal.classList.remove('on')">닫기</button></div></div>
+<div class=modal id=attModal><div class=card><h3>📅 출석 보상</h3>
+<p style="color:#cdd1ea;font-size:13px;line-height:1.6;margin:0 0 8px">매일 접속하면 보상이 쌓여요. 하루를 건너뛰면 1일차부터 다시 시작해요.</p>
+<div id=attGrid style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px"></div>
+<div class=setNote id=attMsg></div>
+<button id=attClaim onclick="claimAttend()" style="width:100%;margin:8px 0 6px">오늘 보상 받기</button>
+<button onclick="attModal.classList.remove('on')">닫기</button></div></div>
 <div class=modal id=shopModal><div class=card><h3>🛍️ 냥이 상점</h3><div class=tabRow><button class=tabBtn id=tabTheme onclick="switchShopTab('theme')">🎨 테마</button><button class=tabBtn id=tabDecor onclick="switchShopTab('decor')">🧶 소품</button></div><div id=shopList></div><button onclick="shopModal.classList.remove('on')">닫기</button></div></div>
 <div class=modal id=memoryModal><div class=card><h3>📖 작은 추억</h3><p id=memoryBody style="color:#cdd1ea;line-height:1.7"></p><button onclick="memoryModal.classList.remove('on')">닫기</button></div></div>
 <script>
@@ -265,18 +289,18 @@ function completeDailyIfNeeded(){
 
 // ===== 방 소품(달빛으로 구매, 고양이 옆에서 흔들리는 연출) =====
 const decorItems = {
-  yarn:{name:'실뭉치', emoji:'🧶', cost:20},
-  fish:{name:'물고기 장난감', emoji:'🐟', cost:30},
-  plant:{name:'화분', emoji:'🪴', cost:15},
-  basket:{name:'바구니', emoji:'🧺', cost:25},
+  yarn:{name:'실뭉치', emoji:'🧶', cost:60},
+  fish:{name:'물고기 장난감', emoji:'🐟', cost:90},
+  plant:{name:'화분', emoji:'🪴', cost:45},
+  basket:{name:'바구니', emoji:'🧺', cost:75},
   lantern:{name:'작은 등불', emoji:'🏮', cost:0, weekly:true},
-  pumpkin:{name:'호박', emoji:'🎃', cost:0, weekly:true},
-  tree:{name:'작은 트리', emoji:'🎄', cost:0, weekly:true},
   cake:{name:'케이크', emoji:'🎂', cost:0, weekly:true},
   bunny:{name:'달토끼 인형', emoji:'🐇', cost:0, weekly:true},
-  kite:{name:'연', emoji:'🪁', cost:0, weekly:true},
-  snow:{name:'눈사람', emoji:'⛄', cost:0, weekly:true},
-  flower:{name:'꽃다발', emoji:'💐', cost:0, weekly:true}
+  flower:{name:'꽃다발', emoji:'💐', cost:0, weekly:true},
+  scratcher:{name:'스크래처', emoji:'🪵', cost:0, weekly:true},
+  cushion:{name:'폭신 쿠션', emoji:'🛏️', cost:0, weekly:true},
+  tower:{name:'캣타워', emoji:'🏰', cost:0, weekly:true},
+  lamp:{name:'고양이 스탠드', emoji:'💡', cost:0, weekly:true}
 };
 function renderDecorSlot(){
   decorSlot.innerHTML = equippedDecor.map((k,idx)=>{
@@ -290,8 +314,8 @@ function buyDecor(k){
     if(equippedDecor.includes(k)){equippedDecor=equippedDecor.filter(x=>x!==k)}
     else{if(equippedDecor.length>=2)equippedDecor.shift();equippedDecor.push(k)}
   } else {
-    if(moon<d.cost){msg.textContent='🌙 달빛이 부족해요';renderShop();return}
-    moon-=d.cost;localStorage.pawMoon=moon;moonWallet.textContent='🌙 '+moon;
+    if(stars<d.cost){msg.textContent='⭐ 별이 부족해요';renderShop();return}
+    stars-=d.cost;localStorage.pawStars=stars;wallet.textContent='⭐ '+stars;
     ownedDecor.push(k);localStorage.pawDecorOwned=JSON.stringify(ownedDecor);
     if(equippedDecor.length>=2)equippedDecor.shift();equippedDecor.push(k);
   }
@@ -343,7 +367,7 @@ function takePhoto(){
 // ===== 카메라 조준 모드: 동그라미를 끌어서 움직이고, 고양이 위에서 손을 떼면 촬영 =====
 // 터치/마우스 공통(pointer events). 화면 어디를 눌러도 '상대 이동'으로 끌 수 있어서 손가락이 동그라미를 가리지 않아요.
 let aiming=false, aimX=.5, aimY=.5, homeStageEl=null, aimDrag=null;
-const AIM_HIT_RADIUS=0.17; // 판정 반경(스테이지 너비 대비). 클수록 관대함
+const AIM_HIT_RADIUS=0.22; // 판정 반경(스테이지 너비 대비). 클수록 관대함
 function catAimDistance(){
   let r=homeStageEl.getBoundingClientRect(), c=homeCat.getBoundingClientRect();
   let cx=c.left+c.width/2-r.left, cy=c.top+c.height/2-r.top;
@@ -364,7 +388,7 @@ function enterAimMode(){
   aimX=.5; aimY=.5;
   let r=homeStageEl.getBoundingClientRect();
   setViewfinder(r.width*aimX, r.height*aimY);
-  photoToast.textContent='📸 동그라미를 끌어서 고양이에게 맞추고, 손을 떼면 찍혀요';
+  photoToast.textContent='📸 원하는 곳을 한 번 누르면 카메라가 이동해요. 같은 곳을 한 번 더 누르면 찍혀요';
   homeStageEl.addEventListener('pointerdown', onAimDown);
   homeStageEl.addEventListener('pointermove', onAimMove);
   homeStageEl.addEventListener('pointerup', onAimUp);
@@ -447,42 +471,42 @@ const themeData = {
 
   theme_aurora:{
     name:'오로라 민트',
-    cost:1,
+    cost:20,
     glow:'#7fe7c4',
     warm:'#bdf5e6'
   },
 
   theme_sunset:{
     name:'노을 코랄',
-    cost:1,
+    cost:20,
     glow:'#ff8a65',
     warm:'#ffc4ad'
   },
 
   theme_moonlight:{
     name:'달빛 블루',
-    cost:2,
+    cost:40,
     glow:'#6fb5ff',
     warm:'#b8ddff'
   },
 
   theme_lavender:{
     name:'라벤더 드림',
-    cost:2,
+    cost:40,
     glow:'#b78cff',
     warm:'#dcc8ff'
   },
 
   theme_sakura:{
     name:'벚꽃 핑크',
-    cost:3,
+    cost:60,
     glow:'#ff89c5',
     warm:'#ffd2e9'
   },
 
   theme_starlight:{
     name:'은하수',
-    cost:5,
+    cost:100,
     glow:'#ffffff',
     warm:'#d6f4ff'
   }
@@ -495,7 +519,7 @@ function renderShop(){
   if(shopTab==='theme'){
     let h='';for(const k in themeData){let t=themeData[k],own=owned.includes(k),eq=curTheme===k;h+=`<div class=shopRow><span>${t.name}</span><button onclick="buy('${k}')">${eq?'적용중':own?'적용':t.cost+'⭐'}</button></div>`}shopList.innerHTML=h
   } else {
-    let h='';for(const k in decorItems){let d=decorItems[k],own=ownedDecor.includes(k),eq=equippedDecor.includes(k);if(d.weekly&&!own&&!window.TEST_FREE)continue;h+=`<div class=shopRow><span>${d.emoji} ${d.name}</span><button onclick="buyDecor('${k}')">${own?(eq?'놓는 중':'놓기'):d.cost+'🌙'}</button></div>`}shopList.innerHTML=h
+    let h='';for(const k in decorItems){let d=decorItems[k],own=ownedDecor.includes(k),eq=equippedDecor.includes(k);if(d.weekly&&!own&&!window.TEST_FREE)continue;h+=`<div class=shopRow><span>${d.emoji} ${d.name}</span><button onclick="buyDecor('${k}')">${own?(eq?'놓는 중':'놓기'):d.cost+'⭐'}</button></div>`}shopList.innerHTML=h
   }
 }
 function buy(k){let data=themeData[k];
@@ -990,8 +1014,8 @@ homeCat.addEventListener('pointerdown',function(){
 
 /* ===================== 주간 특별한 밤 ===================== */
 var weeklyMode=false,weeklyPrevSt=1;
-var WEEKLY_ITEMS=['lantern','pumpkin','tree','cake','bunny','kite','snow','flower'];
-WEEKLY_ITEMS.forEach(function(k){PLAY[k]={anim:'p-sway',pose:'lookup',dur:3000,fx:'✨',msg:decorItems[k].emoji+' 고양이가 '+decorItems[k].name+'을(를) 구경해요'}});
+var WEEKLY_ITEMS=['lantern','tower','cake','scratcher','bunny','lamp','flower','cushion'];
+WEEKLY_ITEMS.forEach(function(k){if(!decorItems[k]||PLAY[k])return;PLAY[k]={anim:'p-sway',pose:'lookup',dur:3000,fx:'✨',msg:decorItems[k].emoji+' 고양이가 '+decorItems[k].name+'을(를) 구경해요'}});
 function weekKey(){var d=new Date(),day=(d.getDay()+6)%7,m=new Date(d.getFullYear(),d.getMonth(),d.getDate()-day);return m.getFullYear()+'-'+(m.getMonth()+1)+'-'+m.getDate()}
 function weekItemKey(){var d=new Date(),day=(d.getDay()+6)%7,m=new Date(d.getFullYear(),d.getMonth(),d.getDate()-day);return WEEKLY_ITEMS[Math.floor(m.getTime()/(7*864e5))%WEEKLY_ITEMS.length]}
 function weeklyDone(){return localStorage.pawWeekly===weekKey()}
@@ -1026,6 +1050,8 @@ renderWeekly();renderAff();
 
 /* ===================== 고양이 선택 / 배경 선택 / 소품 그림 / 표정 ===================== */
 var CUR_CAT=(function(){try{return localStorage.pawCat||'gray'}catch(e){return'gray'}})();
+/* 포즈 그림이 준비되면 이 목록에서 빼면 상점에 열려요 */
+var HIDDEN_CATS=['white','calico','ragdoll','bengal','silver','mainecoon'];
 var CAT_DEFS=[
   {id:'gray',name:'별이',cost:0,prev:'cats/idle.webp'},
   {id:'orange',name:'콩이',cost:80,p:['idle','lookup','paw','sad','clap','surprise','loaf','groom','back','happy','sleep','smile','stretch']},
@@ -1036,8 +1062,8 @@ var CAT_DEFS=[
   {id:'ragdoll',name:'솜이',cost:100,p:['idle','paw','happy','sleep']},
   {id:'russian',name:'안개',cost:100,p:['idle','paw','happy','sleep','lookup','groom']},
   {id:'bengal',name:'호피',cost:100,p:['idle','paw','happy','sleep']},
-  {id:'silver',name:'은별',cost:120,p:['idle','paw','happy','sleep']},
-  {id:'mainecoon',name:'밤이',cost:120,p:['idle','paw','happy','sleep']}
+  {id:'silver',name:'은별',cost:150,p:['idle','paw','happy','sleep']},
+  {id:'mainecoon',name:'밤이',cost:150,p:['idle','paw','happy','sleep']}
 ];
 var CAT_KNOWN=['idle','lookup','paw','receive','sleep','happy','yawn','stretch','smile','groom','loaf','basket','play_yarn','play_fish','play_plant','sad','clap','surprise','back'];
 var CAT_POOL_W={idle:40,lookup:15,paw:12,happy:14,sleep:6,groom:10,loaf:8,back:5,clap:4,surprise:3,smile:8,yawn:6,stretch:7};
@@ -1093,9 +1119,9 @@ var BG_DEFS=[
   {id:'meteor',name:'별똥별 밤',cost:50},
   {id:'sakura',name:'벚꽃 밤',cost:50},
   {id:'autumn',name:'단풍 노을',cost:40},
-  {id:'aurora',name:'오로라 밤',cost:60},
+  {id:'aurora',name:'오로라 밤',cost:70},
   {id:'halloween',name:'할로윈 밤',cost:50},
-  {id:'christmas',name:'크리스마스 밤',cost:60}
+  {id:'christmas',name:'크리스마스 밤',cost:50}
 ];
 var CUR_BG=(function(){try{return localStorage.pawBg||'default'}catch(e){return'default'}})();
 var bgOwned=(function(){try{var a=JSON.parse(localStorage.pawBgOwned||'["default"]');if(a.indexOf('default')<0)a.push('default');return a}catch(e){return['default']}})();
@@ -1116,8 +1142,11 @@ function applyBg(){
     if(shopTab==='cat'){
       var h='';CAT_DEFS.forEach(function(c){
         var own=catsOwned.indexOf(c.id)>=0,cur=CUR_CAT===c.id;
+        if(HIDDEN_CATS.indexOf(c.id)>=0&&!own)return;   /* 준비 중인 고양이는 숨김 */
         h+=catRow(c);
-      });shopList.innerHTML=h;
+      });
+      if(HIDDEN_CATS.some(function(i){return catsOwned.indexOf(i)<0}))h+='<div class=shopRow style="opacity:.8"><span class=shopIco><span style="font-size:34px;width:48px;text-align:center">🐾</span><span class=catInfo><b>곧 만나요</b> <small>새 친구들이 오고 있어요</small><em>조금만 기다려주세요 ✨</em></span></span></div>';
+      shopList.innerHTML=h;
     }else if(shopTab==='bg'){
       var h2='';BG_DEFS.forEach(function(b){
         var own=bgOwned.indexOf(b.id)>=0,cur=CUR_BG===b.id;
@@ -1161,10 +1190,10 @@ function buyBg(id){
   var art={yarn:['items/yarn.webp',30],fish:['items/fish.webp',26],plant:['items/plant.webp',40],basket:['items/basket.webp',32],
     lantern:['items/lantern.webp',44],bunny:['items/bunny.webp',40],flower:['items/flower.webp',42],cake:['items/cake.webp',36]};
   for(var k in art){decorItems[k].img=art[k][0];decorItems[k].h=art[k][1]}
-  decorItems.scratcher={name:'스크래처',emoji:'🪵',cost:25,img:'items/scratcher.webp',h:68};
-  decorItems.cushion={name:'폭신 쿠션',emoji:'🛏️',cost:25,img:'items/cushion.webp',h:26};
-  decorItems.tower={name:'캣타워',emoji:'🏰',cost:40,img:'items/tower.webp',h:82};
-  decorItems.lamp={name:'고양이 스탠드',emoji:'💡',cost:30,img:'items/lamp.webp',h:52};
+  decorItems.scratcher={name:'스크래처',emoji:'🪵',cost:0,weekly:true,img:'items/scratcher.webp',h:68};
+  decorItems.cushion={name:'폭신 쿠션',emoji:'🛏️',cost:0,weekly:true,img:'items/cushion.webp',h:26};
+  decorItems.tower={name:'캣타워',emoji:'🏰',cost:0,weekly:true,img:'items/tower.webp',h:82};
+  decorItems.lamp={name:'고양이 스탠드',emoji:'💡',cost:0,weekly:true,img:'items/lamp.webp',h:52};
   PLAY.scratcher={anim:'p-hop',pose:'paw',dur:2800,fx:'✨',msg:'🪵 고양이가 스크래처에 발톱을 갈아요'};
   PLAY.tower={anim:'',pose:'lookup',dur:3200,fx:'💕',msg:'🏰 고양이가 캣타워를 올려다봐요'};
   PLAY.cushion={anim:'',pose:'sleep',dur:6500,fx:'💤',msg:'🛏️ 고양이가 쿠션에서 쉬어요',inside:true};
@@ -1595,5 +1624,295 @@ function extraBadge(cx,cy,on,type){
   tutRefresh=function(){var r=_trH.apply(this,arguments);hold();return r};
   var _mkH=make;
   make=function(){coachCard._h=0;coachCard.style.minHeight='';return _mkH.apply(this,arguments)};
+})();
+
+/* ===================== 백업 / 복원 ===================== */
+function bkCollect(withPhotos){
+  var d={};Object.keys(localStorage).forEach(function(k){if(k.indexOf('paw')===0&&(withPhotos||k!=='pawPhotos'))d[k]=localStorage.getItem(k)});
+  return {app:'pawlight',v:1,t:Date.now(),d:d};
+}
+function bkMsgSet(t){var e=document.getElementById('bkMsg');if(e)e.textContent=t}
+function openBackup(){bkMsgSet('');bkText.value='';settingsModal.classList.remove('on');backupModal.classList.add('on');Snd.play('ui')}
+function backupFile(){
+  try{
+    var b=new Blob([JSON.stringify(bkCollect(true))],{type:'application/json'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(b);
+    var n=new Date();a.download='pawlight-backup-'+n.getFullYear()+('0'+(n.getMonth()+1)).slice(-2)+('0'+n.getDate()).slice(-2)+'.json';
+    document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);
+    bkMsgSet('✅ 파일을 저장했어요. 파일이 안 보이면 아래 "코드 복사"를 써 주세요.');
+  }catch(e){bkMsgSet('파일 저장이 안 되는 환경이에요. "코드 복사"를 써 주세요.')}
+}
+function backupCopy(){
+  var txt=JSON.stringify(bkCollect(false));
+  function done(){bkMsgSet('✅ 코드를 복사했어요. 메모장이나 메신저 "나에게 보내기"에 붙여넣어 보관하세요.')}
+  function fallback(){bkText.value=txt;bkText.focus();bkText.select();try{document.execCommand('copy');done()}catch(e){bkMsgSet('아래 칸의 코드를 직접 길게 눌러 복사해 주세요.')}}
+  try{navigator.clipboard.writeText(txt).then(done,fallback)}catch(e){fallback()}
+}
+function bkApply(txt){
+  var o;try{o=JSON.parse(txt)}catch(e){bkMsgSet('❌ 백업 코드가 올바르지 않아요.');return}
+  if(!o||o.app!=='pawlight'||!o.d||typeof o.d!=='object'){bkMsgSet('❌ 파우라이트 백업이 아니에요.');return}
+  var keys=Object.keys(o.d).filter(function(k){return k.indexOf('paw')===0});
+  if(!keys.length){bkMsgSet('❌ 백업 안에 데이터가 없어요.');return}
+  if(!confirm('현재 진행 상황이 백업 내용으로 바뀌어요. 복원할까요?'))return;
+  var keepPhotos=!('pawPhotos' in o.d)?localStorage.getItem('pawPhotos'):null;
+  Object.keys(localStorage).filter(function(k){return k.indexOf('paw')===0}).forEach(function(k){localStorage.removeItem(k)});
+  keys.forEach(function(k){try{localStorage.setItem(k,String(o.d[k]))}catch(e){}});
+  if(keepPhotos)try{localStorage.setItem('pawPhotos',keepPhotos)}catch(e){}
+  location.reload();
+}
+function restoreText(){bkApply(bkText.value.trim())}
+function restoreFile(inp){
+  var f=inp.files&&inp.files[0];if(!f)return;
+  var r=new FileReader();r.onload=function(){bkApply(String(r.result))};r.readAsText(f);inp.value='';
+}
+/* 삭제된 이모지 소품이 저장돼 있으면 정리 */
+(function(){
+  try{
+    var ok=function(k){return !!decorItems[k]};
+    var o=ownedDecor.filter(ok),e=equippedDecor.filter(ok);
+    if(o.length!==ownedDecor.length){ownedDecor=o;localStorage.pawDecorOwned=JSON.stringify(o)}
+    if(e.length!==equippedDecor.length){equippedDecor=e;localStorage.pawDecorEquipped=JSON.stringify(e)}
+  }catch(e){}
+})();
+
+/* ===================== 달빛 충전 (인앱 결제 자리) + 무료 보상 ===================== */
+var MOON_PACKS=[
+  {id:'moon_s',moon:60,price:'₩1,100',tag:''},
+  {id:'moon_m',moon:200,price:'₩3,300',tag:'인기'},
+  {id:'moon_l',moon:450,price:'₩6,600',tag:'가장 알뜰'}
+];
+/* 실제 결제 연결 지점: 앱에서 window.IAP_PROVIDER = { buy:function(productId){ return Promise<boolean> } } 를 넣어주면 됩니다. */
+function grantMoon(n){moon+=n;try{localStorage.pawMoon=moon}catch(e){}moonWallet.textContent='🌙 '+moon}
+function openMoonShop(){
+  moonMsg.textContent='';
+  moonPacks.innerHTML=MOON_PACKS.map(function(k){
+    return '<div class=shopRow><span>🌙 '+k.moon+(k.tag?' <small style="color:#ffd27a">'+k.tag+'</small>':'')+'</span><button onclick="buyMoon(\''+k.id+'\')">'+k.price+'</button></div>';
+  }).join('');
+  moonModal.classList.add('on');Snd.play('ui');
+}
+function buyMoon(id){
+  var k=MOON_PACKS.filter(function(x){return x.id===id})[0];if(!k)return;
+  if(window.IAP_PROVIDER&&window.IAP_PROVIDER.buy){
+    window.IAP_PROVIDER.buy(id).then(function(ok){if(ok){grantMoon(k.moon);moonMsg.textContent='✅ 🌙 '+k.moon+' 충전 완료!';Snd.play('buy');haptic(20);renderShop()}else moonMsg.textContent='결제가 취소됐어요.'})
+      .catch(function(){moonMsg.textContent='결제에 실패했어요. 잠시 후 다시 시도해 주세요.'});
+  }else if(window.TEST_FREE){
+    grantMoon(k.moon);moonMsg.textContent='🧪 테스트 버전이라 무료로 충전됐어요 (+🌙 '+k.moon+')';Snd.play('buy');renderShop();
+  }else moonMsg.textContent='곧 열려요! 지금은 무료로 모아 주세요.';
+}
+(function(){
+  moonWallet.style.cursor='pointer';moonWallet.onclick=openMoonShop;
+  var _rs=renderShop;
+  renderShop=function(){
+    var r=_rs.apply(this,arguments);
+    try{if(shopList&&!shopList.querySelector('.moonBuyBtn'))shopList.insertAdjacentHTML('afterbegin','<button class=moonBuyBtn style="width:100%;margin-bottom:8px" onclick="openMoonShop()">🌙 달빛 충전하기</button>')}catch(e){}
+    return r;
+  };
+  // 퍼즐 5판 클리어마다 +2 달빛
+  var _scM=showClear;
+  showClear=function(g,n){
+    var r=_scM.apply(this,arguments);
+    try{
+      if(!weeklyMode){
+        var c=Number(localStorage.pawClears||0)+1;localStorage.pawClears=c;
+        if(c%5===0){
+          grantMoon(2);
+          var el=document.createElement('span');el.className='rewardItem';el.textContent='+2 🌙 (5판 달성)';el.style.opacity='0';clearReward.appendChild(el);
+          setTimeout(function(){el.style.opacity='';el.style.animation='rewardUp .5s ease-out both'},350+3*330+300);
+        }
+      }
+    }catch(e){}
+    return r;
+  };
+})();
+
+/* ===================== 사진첩: 찍은 고양이 그대로 보여주기 ===================== */
+function catPosePath(c,pose){return c==='gray'?'cats/'+pose+'.webp':'cats/'+c+'/'+pose+'.webp'}
+(function(){
+  var _tp=takePhoto;
+  takePhoto=function(){
+    var r=_tp.apply(this,arguments);
+    try{var ph=JSON.parse(localStorage.pawPhotos||'[]');if(ph[0]&&!ph[0].cat){ph[0].cat=CUR_CAT;localStorage.pawPhotos=JSON.stringify(ph)}}catch(e){}
+    return r;
+  };
+  var _om2=openMemory;
+  openMemory=function(){
+    var r=_om2.apply(this,arguments);
+    try{
+      var ph=JSON.parse(localStorage.pawPhotos||'[]');
+      document.querySelectorAll('#memoryBody .photoCard img').forEach(function(img,i){
+        var p=ph[i];if(!p)return;var c=p.cat||'gray';
+        img.onerror=function(){this.onerror=null;this.src=catPosePath(c,'idle')};
+        img.src=p.img?p.img:catPosePath(c,p.pose==='receive'&&c!=='gray'?'happy':p.pose);if(p.img)img.onerror=null;
+      });
+    }catch(e){}
+    return r;
+  };
+})();
+
+
+/* ===================== 카메라: 한 번 누르면 이동, 같은 곳 한 번 더 누르면 촬영 ===================== */
+var AIM_SAME_PX=84; /* 같은 곳으로 보는 반경(px) */
+function aimShoot(){
+  var el=homeStageEl;exitAimMode();
+  el.classList.add('shot');setTimeout(function(){el.classList.remove('shot')},260);
+  haptic(15);takePhoto();
+}
+onAimDown=function(e){
+  if(!aiming||aimDrag||e.target.closest('#aimCancel'))return;
+  var r=homeStageEl.getBoundingClientRect();
+  aimDrag={id:e.pointerId,sx:e.clientX,sy:e.clientY,ax:aimX*r.width,ay:aimY*r.height,moved:false,t:Date.now()};
+  try{homeStageEl.setPointerCapture(e.pointerId)}catch(_){}
+};
+onAimUp=function(e){
+  if(!aiming||!aimDrag||e.pointerId!==aimDrag.id)return;
+  var d=aimDrag;aimDrag=null;
+  var r=homeStageEl.getBoundingClientRect();
+  if(d.moved){                       /* 끌어서 옮긴 경우: 위치만 바뀜 */
+    photoToast.textContent=catAimDistance()<AIM_HIT_RADIUS?'📸 좋아요! 같은 곳을 한 번 눌러보세요':'📸 원하는 곳을 눌러서 카메라를 옮겨요';
+    return;
+  }
+  var tx=e.clientX-r.left,ty=e.clientY-r.top,vx=aimX*r.width,vy=aimY*r.height;
+  if(Math.hypot(tx-vx,ty-vy)<AIM_SAME_PX){      /* 같은 곳을 다시 누름 → 촬영 */
+    if(catAimDistance()<AIM_HIT_RADIUS)aimShoot();
+    else photoToast.textContent='😿 빗나갔어요, 고양이 쪽을 눌러 카메라를 옮겨요';
+  }else{                                         /* 다른 곳을 누름 → 카메라 이동 */
+    aimX=Math.max(0,Math.min(1,tx/r.width));aimY=Math.max(0,Math.min(1,ty/r.height));
+    viewfinder.classList.add('glide');setViewfinder(aimX*r.width,aimY*r.height);
+    setTimeout(function(){viewfinder.classList.remove('glide')},220);
+    haptic(6);
+    photoToast.textContent=catAimDistance()<AIM_HIT_RADIUS?'📸 같은 곳을 한 번 더 누르면 찍혀요!':'📸 고양이 쪽을 눌러서 카메라를 옮겨요';
+  }
+};
+
+/* ===================== 진짜 사진처럼: 배경·소품·고양이를 한 장으로 찍기 ===================== */
+function snapScene(cx,cy){
+  var sc=document.querySelector('#homeScreen .homeScene'),R=sc.getBoundingClientRect(),K=2;
+  var W=Math.round(R.width*K),H=Math.round(R.height*K);
+  var cv=document.createElement('canvas');cv.width=W;cv.height=H;var g=cv.getContext('2d');
+  var imgs=[].slice.call(sc.querySelectorAll('img')).filter(function(i){
+    if(!i.complete||!i.naturalWidth)return false;var cs=getComputedStyle(i);
+    return cs.display!=='none'&&cs.visibility!=='hidden'&&parseFloat(cs.opacity)>.05&&!i.closest('.viewfinder');
+  });
+  imgs.sort(function(a,b){return (a===homeBg?-1:a===homeCat?1:0)-(b===homeBg?-1:b===homeCat?1:0)});
+  imgs.forEach(function(i){
+    var r=i.getBoundingClientRect(),x=(r.left-R.left)*K,y=(r.top-R.top)*K,w=r.width*K,h=r.height*K;
+    if(i===homeBg){
+      var ir=i.naturalWidth/i.naturalHeight,br=w/h,sw=i.naturalWidth,sh=i.naturalHeight,sx=0,sy=0;
+      if(ir>br){sw=sh*br;sx=(i.naturalWidth-sw)/2}else{sh=sw/br}
+      try{var f=getComputedStyle(i).filter;if(f&&f!=='none')g.filter=f}catch(e){}
+      g.drawImage(i,sx,sy,sw,sh,x,y,w,h);g.filter='none';return;
+    }
+    var flip=false;try{flip=new DOMMatrix(getComputedStyle(i).transform).a<0}catch(e){}
+    if(flip){g.save();g.translate(x+w,y);g.scale(-1,1);g.drawImage(i,0,0,w,h);g.restore()}
+    else g.drawImage(i,x,y,w,h);
+  });
+  var fw=124*K,fh=fw; /* 카메라 동그라미(124px)와 같은 크기만 찍기 */
+  var fx=Math.max(0,Math.min(W-fw,cx*R.width*K-fw/2)),fy=Math.max(0,Math.min(H-fh,cy*R.height*K-fh/2));
+  var out=document.createElement('canvas');out.width=360;out.height=360;
+  out.getContext('2d').drawImage(cv,fx,fy,fw,fh,0,0,out.width,out.height);
+  return out.toDataURL('image/jpeg',.82);
+}
+(function(){
+  var _tp3=takePhoto;
+  takePhoto=function(){
+    var data=null;try{data=snapScene(aimX,aimY)}catch(e){}
+    var r=_tp3.apply(this,arguments);
+    try{
+      if(data){var ph=JSON.parse(localStorage.pawPhotos||'[]');if(ph[0]){ph[0].img=data;localStorage.pawPhotos=JSON.stringify(ph)}}
+    }catch(e){
+      try{var ph2=JSON.parse(localStorage.pawPhotos||'[]');if(ph2.length>12){ph2=ph2.slice(0,12);if(data)ph2[0].img=data;localStorage.pawPhotos=JSON.stringify(ph2)}}catch(x){}
+    }
+    return r;
+  };
+})();
+
+/* ===================== 출석 보상 ===================== */
+var ATT_REWARDS=[
+  {s:5},{s:5},{s:10},{m:2},{s:10},{s:15},{m:5,s:15}
+]; /* 1~7일차. s=별, m=달빛 (7일 주기) */
+function attLabel(r){return (r.s?'⭐'+r.s:'')+(r.s&&r.m?' ':'')+(r.m?'🌙'+r.m:'')}
+function attState(){
+  var st0;try{st0=JSON.parse(localStorage.pawAtt||'{}')}catch(e){st0={}}
+  var today=new Date();today.setHours(0,0,0,0);
+  var tk=today.getTime();
+  var last=st0.last||0,day=st0.day||0;
+  var diff=last?Math.round((tk-last)/864e5):99;
+  var claimed=(diff===0);
+  var nextDay=claimed?day:(diff===1?(day%7)+1:1);   /* 오늘 받을(또는 받은) 일차 */
+  return {claimed:claimed,day:nextDay,tk:tk};
+}
+function renderAttCard(){
+  var a=attState();
+  attCard.innerHTML='📅 출석 보상 · <b>'+a.day+'일차</b> '+(a.claimed?'<span style="color:#9aa0c8">· 오늘 받았어요 ✓</span>':'<span style="color:#ffe27a">· 받을 수 있어요! 👆</span>');
+}
+function openAttend(){
+  var a=attState();
+  attGrid.innerHTML=ATT_REWARDS.map(function(r,i){
+    var d=i+1,done=a.claimed?d<=a.day:d<a.day,cur=!a.claimed&&d===a.day;
+    return '<div style="border-radius:10px;padding:8px 2px;text-align:center;font-size:11px;line-height:1.5;background:'+(cur?'#4b3f8f':done?'#2a3a2f':'#1c1f38')+';border:1px solid '+(cur?'#ffd45c':'#2e3358')+(d===7?';grid-column:span 2':'')+'"><div style="color:#9aa0c8">'+d+'일차</div><div>'+(done?'✅':attLabel(r))+'</div></div>';
+  }).join('');
+  attClaim.disabled=a.claimed;attClaim.textContent=a.claimed?'오늘은 이미 받았어요 ✓':'오늘 보상 받기 ('+attLabel(ATT_REWARDS[a.day-1])+')';
+  attMsg.textContent='';attModal.classList.add('on');
+}
+function claimAttend(){
+  var a=attState();if(a.claimed)return;
+  var r=ATT_REWARDS[a.day-1];
+  if(r.s){stars+=r.s;localStorage.pawStars=stars;wallet.textContent='⭐ '+stars}
+  if(r.m)grantMoon(r.m);
+  localStorage.pawAtt=JSON.stringify({last:a.tk,day:a.day});
+  try{Snd.play('star');haptic([15,40,15])}catch(e){}
+  renderAttCard();openAttend();attMsg.textContent='🎁 '+a.day+'일차 보상 '+attLabel(r)+' 을(를) 받았어요!';
+}
+renderAttCard();
+if(attState().claimed===false)setTimeout(function(){try{if(!document.querySelector('.modal.on'))openAttend()}catch(e){}},1500);
+
+/* ===================== 광고 제거 · 광고 보고 보상 2배 ===================== */
+function hasNoAds(){return localStorage.pawNoAds==='1'}
+/* 실제 광고 연결 지점: window.AD_PROVIDER = { show:function(){ return Promise<boolean> } } */
+function watchAd(cb){
+  if(hasNoAds())return cb();
+  if(window.AD_PROVIDER&&window.AD_PROVIDER.show){window.AD_PROVIDER.show().then(function(ok){if(ok)cb()}).catch(function(){})}
+  else if(window.TEST_FREE)cb();     /* 테스트: 광고 없이 바로 지급 */
+  else{try{photoToast.textContent='광고를 불러올 수 없어요'}catch(e){}}
+}
+function buyNoAds(){
+  function ok(){localStorage.pawNoAds='1';openMoonShop();moonMsg.textContent='✅ 광고 제거가 적용됐어요!'}
+  if(window.IAP_PROVIDER&&window.IAP_PROVIDER.buy)window.IAP_PROVIDER.buy('remove_ads').then(function(r){if(r)ok();else moonMsg.textContent='결제가 취소됐어요.'});
+  else if(window.TEST_FREE)ok();
+  else moonMsg.textContent='곧 열려요!';
+}
+(function(){
+  var _om3=openMoonShop;
+  openMoonShop=function(){
+    _om3.apply(this,arguments);
+    moonPacks.insertAdjacentHTML('beforeend','<div class=shopRow style="border-top:1px solid #2e3358;margin-top:6px;padding-top:8px"><span>🚫 광고 제거<br><small style="color:#9aa0c8">광고 보상을 바로 받아요</small></span>'+(hasNoAds()?'<button disabled>적용됨 ✓</button>':'<button onclick="buyNoAds()">₩3,300</button>')+'</div>');
+  };
+  var _sc4=showClear;
+  showClear=function(g,n){
+    var r=_sc4.apply(this,arguments);
+    try{
+      var b=document.createElement('button');b.id='adDouble';b.style.cssText='margin-top:10px;width:100%';
+      b.textContent=hasNoAds()?'✨ 별 2배 받기':'📺 광고 보고 별 2배';
+      b.onclick=function(){watchAd(function(){stars+=g;localStorage.pawStars=stars;wallet.textContent='⭐ '+stars;b.disabled=true;b.textContent='✅ +'+g+' ⭐ 추가 지급';try{Snd.play('star');haptic(15)}catch(e){}})};
+      clearReward.insertAdjacentElement('afterend',b);
+      var old=document.getElementById('adDouble');
+      document.querySelectorAll('#adDouble').forEach(function(x,i,all){if(i<all.length-1)x.remove()});
+    }catch(e){}
+    return r;
+  };
+})();
+
+/* ===================== 출시 안전장치: 결제·광고 연결이 없으면 관련 버튼 숨김 ===================== */
+(function(){
+  var css=document.createElement('style');
+  css.textContent='body.noIap .moonBuyBtn{display:none!important}body.noAd #adDouble{display:none!important}';
+  document.head.appendChild(css);
+  function sync(){
+    document.body.classList.toggle('noIap',!(window.IAP_PROVIDER||window.TEST_FREE));
+    document.body.classList.toggle('noAd',!(window.AD_PROVIDER||window.TEST_FREE||hasNoAds()));
+  }
+  sync();setInterval(sync,2000);
+  var _om4=openMoonShop;
+  openMoonShop=function(){if(!(window.IAP_PROVIDER||window.TEST_FREE))return;return _om4.apply(this,arguments)};
 })();
 </script><script>if('serviceWorker' in navigator&&location.protocol!=='file:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script></body></html>
