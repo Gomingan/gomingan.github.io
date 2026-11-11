@@ -141,6 +141,9 @@ body{min-height:100vh;min-height:100dvh}
 </style><style>
 #moonModal,#backupModal{z-index:25}
 #exitModal{z-index:30}
+@keyframes walkBob{0%,100%{translate:0 0;rotate:-2.4deg}25%{translate:0 -3px;rotate:0deg}50%{translate:0 0;rotate:2.4deg}75%{translate:0 -3px;rotate:0deg}}
+#homeCat.walking,.roomCat.walking{animation:walkBob .72s ease-in-out infinite;transform-origin:50% 100%}
+#homeCat.wk.walking{animation:none!important}
 html,body{overflow:hidden;height:100%}
 body{height:100dvh;min-height:0;align-items:start}
 #a{transform-origin:top center}
@@ -1037,12 +1040,14 @@ function weekItemKey(){var d=new Date(),day=(d.getDay()+6)%7,m=new Date(d.getFul
 function weeklyDone(){return localStorage.pawWeekly===weekKey()}
 function renderWeekly(){
   var el=document.getElementById('weeklyCard');if(!el)return;var k=weekItemKey(),it=decorItems[k];
+  if(weeklyLocked()){el.innerHTML='<span>🔒 <b>특별한 밤</b><br>첫 퍼즐을 클리어하면 열려요</span>';return}
   el.innerHTML=weeklyDone()?'✅ 이번 주 <b>특별한 밤</b> 완료 — '+it.emoji+' '+it.name+' 획득! (다음 주 월요일에 새 밤)'
     :'<span>🌟 이번 주 <b>특별한 밤</b><br>클리어하면 '+it.emoji+' <b>'+it.name+'</b> + 🌙 10</span><button class=weeklyBtn onclick="startWeekly()">도전하기</button>';
 }
-function startWeekly(){if(weeklyDone())return;weeklyMode=true;weeklyPrevSt=st;make();switchScreen('puzzle')}
+function weeklyLocked(){return !(Number(localStorage.pawClears||0)>=1||st>1)}
+function startWeekly(){if(weeklyDone()||weeklyLocked())return;weeklyMode=true;weeklyPrevSt=st;make();switchScreen('puzzle')}
 (function(){
-  var _cfg=cfg;cfg=function(){if(weeklyMode)return{target:55,size:5,slack:7,fixed:2,special:3,adj:0,forceMirror:2};return _cfg.apply(this,arguments)};
+  var _cfg=cfg;cfg=function(){var z=_cfg.apply(this,arguments);if(weeklyMode)return{target:Math.max(30,z.target-8),size:z.size,slack:z.slack,fixed:z.fixed,special:Math.min(3,Math.max(z.special,2)),adj:0,forceMirror:2};return z};
   var _sc4=showClear;
   showClear=function(g,n){
     if(weeklyMode){
@@ -1067,16 +1072,17 @@ renderWeekly();renderAff();
 /* ===================== 고양이 선택 / 배경 선택 / 소품 그림 / 표정 ===================== */
 var CUR_CAT=(function(){try{return localStorage.pawCat||'gray'}catch(e){return'gray'}})();
 /* 포즈 그림이 준비되면 이 목록에서 빼면 상점에 열려요 */
-var HIDDEN_CATS=['white','calico','ragdoll','bengal','silver','mainecoon'];
+var HIDDEN_CATS=['russian','ragdoll','bengal','silver','mainecoon'];
 var CAT_DEFS=[
   {id:'gray',name:'별이',cost:0,prev:'cats/idle.webp'},
-  {id:'orange',name:'콩이',cost:80,p:['idle','lookup','paw','sad','clap','surprise','loaf','groom','back','happy','sleep','smile','stretch']},
-  {id:'black',name:'까망이',cost:60,p:['idle','paw','happy','sleep','smile','yawn','loaf']},
-  {id:'tabby',name:'호두',cost:60,p:['idle','paw','happy','sleep','loaf','lookup','stretch']},
-  {id:'white',name:'미르',cost:80,p:['idle','paw','happy','sleep']},
-  {id:'calico',name:'나비',cost:100,p:['idle','paw','happy','sleep']},
+  {id:'orange',name:'콩이',cost:80,p:['idle','lookup','paw','sad','clap','surprise','loaf','groom','back','happy','sleep','smile','stretch','yawn','receive']},
+  {id:'black',name:'까망이',cost:60,p:['idle','paw','happy','lookup','smile','groom','loaf','sleep','yawn','clap']},
+  {id:'starblack',name:'별밤이',cost:60,p:['idle','paw','happy','sleep','lookup','smile','groom','loaf','yawn','stretch','clap','surprise','receive'],an:['sleep','receive']},
+  {id:'tabby',name:'호두',cost:60,p:['idle','paw','happy','sleep','lookup','smile','groom','loaf','yawn','stretch','clap','surprise','receive']},
+  {id:'white',name:'미르',cost:80,p:['idle','paw','happy','sleep','lookup','smile','groom','loaf','yawn','stretch','clap','surprise','receive'],an:['stretch','receive','sleep']},
+  {id:'calico',name:'나비',cost:100,p:['idle','paw','happy','sleep','lookup','smile','groom','loaf','yawn','stretch','clap','surprise','receive','sad'],an:['stretch']},
   {id:'ragdoll',name:'솜이',cost:100,p:['idle','paw','happy','sleep']},
-  {id:'russian',name:'안개',cost:100,p:['idle','paw','happy','sleep','lookup','groom']},
+  {id:'russian',name:'안개',cost:100,p:['idle','paw','happy','groom','lookup','smile','loaf','sleep','yawn','stretch','clap','receive']},
   {id:'bengal',name:'호피',cost:100,p:['idle','paw','happy','sleep']},
   {id:'silver',name:'은별',cost:150,p:['idle','paw','happy','sleep']},
   {id:'mainecoon',name:'밤이',cost:150,p:['idle','paw','happy','sleep']}
@@ -1120,6 +1126,11 @@ function applyCat(id){
       POSE_POOL.length=0;
       for(var r in imgs)if(CAT_POOL_W[r])POSE_POOL.push({k:r,w:CAT_POOL_W[r]});
       refreshCatImages();
+      (def.an||[]).forEach(function(k){
+        var an=new Image();
+        an.onload=function(){if(CUR_CAT!==def.id)return;ANIM[k]=an;try{if(currentPose===k&&IMG['cat_'+k]&&!playing)homeCat.src=IMG['cat_'+k].src}catch(e){}};
+        an.src='cats/'+def.id+'/'+k+'_anim.webp';
+      });
     };
     im.src='cats/'+def.id+'/'+p+'.webp';
   });
@@ -1447,9 +1458,9 @@ playWithDecor=function(){
   tx=Math.max(0,Math.min(100-cw,tx));
   var facingRight=(tx+cw/2)<(il+iw/2);
   currentPose='idle';homeCat.src=IMG.cat_idle.src;
-  var launch=tx+(tx>home0?-12:12);launch=Math.max(0,Math.min(100-cw,launch));
+  var near=!own&&!cfg.perch;var launch=tx+(tx>home0?-1:1)*(near?6:12);launch=Math.max(0,Math.min(100-cw,launch));
   homeCat.style.transform=(tx>home0)?'':'scaleX(-1)';
-  var dist=Math.abs(launch-home0),wms=Math.max(500,dist*45);
+  var dist=Math.abs(launch-home0),wms=Math.max(700,dist*68);
   function land(){
     homeCat.style.transform=facingRight?'':'scaleX(-1)';
     currentPose=pk;homeCat.src=IMG['cat_'+pk].src;
@@ -1467,7 +1478,7 @@ playWithDecor=function(){
     currentPose='idle';homeCat.src=IMG.cat_idle.src;
     homeCat.style.transform=(home0>tx)?'':'scaleX(-1)';
     catJump(Math.max(0,Math.min(100-cw,tx+(home0>tx?12:-12))),13,28+Math.max(0,tb-13)*3,650,function(){
-      catWalk(home0,Math.max(500,Math.abs(tx-home0)*45),function(){
+      catWalk(home0,Math.max(700,Math.abs(tx-home0)*68),function(){
         homeCat.style.transition='';homeCat.style.transform='';homeCat.style.left=home0+'%';homeCat.style.bottom='13%';
         playing=false;playKey=null;
         if(document.getElementById('homeScreen').classList.contains('active'))startHomePoseCycle();
@@ -1475,7 +1486,7 @@ playWithDecor=function(){
     });
   }
   catWalk(launch,wms,function(){
-    catJump(tx,tb,34+Math.max(0,tb-13)*3.2,700,land);
+    if(near)land();else catJump(tx,tb,34+Math.max(0,tb-13)*3.2,700,land);
   });
 };
 /* 소품으로 이동: 점프 없이 그냥 걸어가서 도착 */
@@ -1972,6 +1983,67 @@ function buyNoAds(){
       addEventListener('popstate',function(){handleBack();try{history.pushState({pl:1},'')}catch(e){}});
     }catch(e){}
   }
+})();
+</script>
+<script>
+/* 동작이 끝나면 1~2초 가만히(idle) 쉰 뒤 다음 동작 */
+(function(){
+  var POSE_MS={yawn:5300,stretch:5000,sleep:8500,happy:4500,paw:4500,lookup:5500,receive:4500,idle:5000};
+  function again(ms){homePoseTimer=setTimeout(nextStep,ms)}
+  function show(){
+    if(playing){again(1500);return}
+    currentPose=pickPose();var im=IMG['cat_'+currentPose]||IMG.cat_idle;if(!im){again(3000);return}
+    homeCat.src=im.src;again(POSE_MS[currentPose]||6000);
+  }
+  function nextStep(){
+    if(playing){again(1500);return}
+    if(currentPose!=='idle'&&IMG.cat_idle){
+      currentPose='idle';homeCat.src=IMG.cat_idle.src;
+      homePoseTimer=setTimeout(show,1000+Math.random()*1000);return;
+    }
+    show();
+  }
+  stopHomePoseCycle=function(){clearTimeout(homePoseTimer);clearInterval(homePoseTimer);homePoseTimer=null};
+  startHomePoseCycle=function(){stopHomePoseCycle();show()};
+  if(document.getElementById('homeScreen').classList.contains('active'))startHomePoseCycle();else stopHomePoseCycle();
+})();
+</script>
+<script>
+/* 소품으로 이동할 때: 걷기 애니메이션(옆모습)이 있는 고양이는 걷는 그림으로 이동 */
+(function(){
+  var cache={},tok=0;
+  function walkSrc(){
+    var id=window.CUR_CAT||'gray',p=catPosePath(id,'walk');
+    if(!(id in cache)){cache[id]=null;var im=new Image();im.onload=function(){cache[id]=p};im.onerror=function(){cache[id]=false};im.src=p}
+    return cache[id]||null;
+  }
+  walkSrc();
+  function begin(){var s=walkSrc();tok++;if(!s)return 0;homeCat.src=s;homeCat.classList.add('wk');return tok}
+  function end(t){if(!t)return;setTimeout(function(){if(t!==tok)return;homeCat.classList.remove('wk');var im=IMG['cat_'+currentPose];if(im)homeCat.src=im.src},0)}
+  var _cw=catWalk,_cj=catJump;
+  catWalk=function(x,ms,cb){var t=begin();_cw(x,ms,function(){end(t);if(cb)cb()})};
+  Object.keys(PLAY).forEach(function(k){if(PLAY[k]&&typeof PLAY[k].dur==='number'&&!PLAY[k]._p1){PLAY[k].dur+=1000;PLAY[k]._p1=1}});
+  var _jmp=catJump;
+  catJump=function(x,b,arc,ms,cb){
+    var cur=parseFloat(homeCat.style.bottom);if(isNaN(cur))cur=13;
+    var up=b>cur+1.5,down=b<cur-1.5;
+    if(!up&&!down){var t0=begin();_jmp(x,b,arc,ms,function(){end(t0);cb()});return}
+    var t=begin();ms=Math.max(ms,up?950:850);homeCat.classList.add('walking');
+    if(up){
+      homeCat.style.transition='left '+ms+'ms ease-out, bottom '+ms+'ms cubic-bezier(.25,.75,.35,1)';
+      try{homeCat.animate([{translate:'0 0'},{translate:'0 -'+Math.min(34,arc*.35)+'px',offset:.4},{translate:'0 0'}],{duration:ms,easing:'ease-in-out'})}catch(e){}
+    }else{
+      homeCat.style.transition='left '+ms+'ms cubic-bezier(.3,.1,.6,1), bottom '+ms+'ms cubic-bezier(.6,0,1,.55)';
+      try{homeCat.animate([{translate:'0 0'},{translate:'0 -9px',offset:.18},{translate:'0 0'}],{duration:Math.round(ms*.35),easing:'ease-out'})}catch(e){}
+    }
+    homeCat.style.left=x+'%';homeCat.style.bottom=b+'%';
+    setTimeout(function(){
+      homeCat.classList.remove('walking');end(t);
+      try{homeCat.animate([{scale:'1 1'},{scale:'1.1 .88'},{scale:'.97 1.04',offset:.7},{scale:'1 1'}],{duration:340,easing:'ease-out'})}catch(e){}
+      cb();
+    },ms);
+  };
+  window.__walkSrc=walkSrc;
 })();
 </script>
 <script>if('serviceWorker' in navigator&&location.protocol!=='file:'){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script></body></html>
