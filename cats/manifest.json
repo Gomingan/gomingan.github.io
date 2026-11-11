@@ -38,7 +38,8 @@
     },
     "sleep": {
       "file": "cats/sleep.webp",
-      "w": 0
+      "w": 0,
+      "anim": "cats/sleep_anim.webp"
     },
     "smile": {
       "file": "cats/smile.webp",
