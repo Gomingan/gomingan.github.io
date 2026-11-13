@@ -1,32 +1,81 @@
 {
-  "name": "Pawlight",
-  "short_name": "Pawlight",
-  "description": "작은 별빛이, 더 따뜻한 하루를 만들어줘.",
-  "lang": "ko",
-  "start_url": "./index.html",
-  "scope": "./",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#11162d",
-  "theme_color": "#11162d",
-  "icons": [
-    {
-      "src": "icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+  "_설명": "새 포즈 그림(투명 이미지)을 cats/ 에 넣고 아래 poses 에 추가하세요. w 는 홈 화면에서 나올 확률 가중치.",
+  "poses": {
+    "happy": {
+      "file": "cats/happy.webp",
+      "w": 14,
+      "anim": "cats/happy_anim.webp"
     },
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+    "yawn": {
+      "file": "cats/yawn.webp",
+      "w": 12,
+      "anim": "cats/yawn_anim.webp"
     },
-    {
-      "src": "icons/icon-512-maskable.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+    "stretch": {
+      "file": "cats/stretch.webp",
+      "w": 12,
+      "anim": "cats/stretch_anim.webp"
+    },
+    "idle": {
+      "file": "cats/idle.webp",
+      "w": 0,
+      "anim": "cats/idle_anim.webp"
+    },
+    "lookup": {
+      "file": "cats/lookup.webp",
+      "w": 0,
+      "anim": "cats/lookup_anim.webp"
+    },
+    "paw": {
+      "file": "cats/paw.webp",
+      "w": 0,
+      "anim": "cats/paw_anim.webp"
+    },
+    "receive": {
+      "file": "cats/receive.webp",
+      "w": 0,
+      "anim": "cats/receive_anim.webp"
+    },
+    "sleep": {
+      "file": "cats/sleep.webp",
+      "w": 0,
+      "anim": "cats/sleep_anim.webp"
+    },
+    "smile": {
+      "file": "cats/smile.webp",
+      "w": 10
+    },
+    "play_yarn": {
+      "file": "cats/play_yarn.webp",
+      "w": 0
+    },
+    "play_fish": {
+      "file": "cats/play_fish.webp",
+      "w": 0
+    },
+    "basket": {
+      "file": "cats/basket.webp",
+      "w": 0
+    },
+    "play_plant": {
+      "file": "cats/play_plant.webp",
+      "w": 0
+    },
+    "groom": {
+      "file": "cats/groom.webp",
+      "w": 10
+    },
+    "loaf": {
+      "file": "cats/loaf.webp",
+      "w": 8
+    },
+    "clap": {
+      "file": "cats/clap.webp",
+      "w": 4
+    },
+    "surprise": {
+      "file": "cats/surprise.webp",
+      "w": 3
     }
-  ]
+  }
 }
